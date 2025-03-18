@@ -18,3 +18,16 @@ type Project struct {
 	Deadline     time.Time
 	Tasks        []Task `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 }
+
+const (
+	StatusOpen       = "Open"
+	StatusInProgress = "In Progress"
+	StatusCompleted  = "Completed"
+	StatusCanceled   = "Canceled"
+)
+
+func (p *Project) SetStatus(status string) {
+	if status == StatusOpen || status == StatusInProgress || status == StatusCompleted || status == StatusCanceled {
+		p.Status = status
+	}
+}
