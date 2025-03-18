@@ -11,4 +11,10 @@ func main() {
 	fmt.Println("Running in:", config.Env)
 	fmt.Println("Database Path:", config.DatabasePath)
 	fmt.Println("API URL:", config.ApiUrl)
+
+	// db, err := persistence.GetDB(config.DatabasePath)
+	// if err != nil {
+	// 	log.Fatalf("Failed to connect to database: %v", err)
+	// }
+
 }
