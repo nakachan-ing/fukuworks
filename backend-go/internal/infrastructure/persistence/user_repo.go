@@ -15,10 +15,7 @@ func NewUserRepository(db *gorm.DB) repositories.UserRepository {
 }
 
 func (r *UserRepositoryImpl) Create(user *models.User) error {
-	if err := r.db.First(user, 1).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Create(user).Error
 }
 
 func (r *UserRepositoryImpl) FindByID(id uint) (*models.User, error) {
