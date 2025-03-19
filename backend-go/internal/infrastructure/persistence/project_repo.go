@@ -15,10 +15,7 @@ func NewProjectRepository(db *gorm.DB) repositories.ProjectRepository {
 }
 
 func (r *ProjectRepositoryImpl) Create(project *models.Project) error {
-	if err := r.db.First(project, 1).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Create(project).Error
 }
 
 func (r *ProjectRepositoryImpl) FindByID(id uint) (*models.Project, error) {

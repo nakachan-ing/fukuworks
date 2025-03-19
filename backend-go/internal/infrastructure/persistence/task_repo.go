@@ -15,10 +15,7 @@ func NewTaskRepository(db *gorm.DB) repositories.TaskRepository {
 }
 
 func (r *TaskRepositoryImpl) Create(task *models.Task) error {
-	if err := r.db.First(task, 1).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Create(task).Error
 }
 
 func (r *TaskRepositoryImpl) FindByID(id uint) (*models.Task, error) {
