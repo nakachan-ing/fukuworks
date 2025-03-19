@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/nakachan-ing/fukuworks/backend-go/config"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/infrastructure/persistence"
 )
 
 func main() {
@@ -12,9 +14,9 @@ func main() {
 	fmt.Println("Database Path:", config.DatabasePath)
 	fmt.Println("API URL:", config.ApiUrl)
 
-	// db, err := persistence.GetDB(config.DatabasePath)
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to database: %v", err)
-	// }
+	_, err := persistence.GetDB(config.DatabasePath)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
 
 }
