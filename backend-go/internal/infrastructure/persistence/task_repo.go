@@ -20,18 +20,14 @@ func (r *TaskRepositoryImpl) Create(task *models.Task) error {
 
 func (r *TaskRepositoryImpl) FindByID(id uint) (*models.Task, error) {
 	var task models.Task
-	if err := r.db.First(task, id).Error; err != nil {
-		return nil, err
-	}
-	return &task, nil
+	err := r.db.First(task, id).Error
+	return &task, err
 }
 
 func (r *TaskRepositoryImpl) FindAll() ([]models.Task, error) {
 	var tasks []models.Task
-	if err := r.db.Find(&tasks).Error; err != nil {
-		return nil, err
-	}
-	return tasks, nil
+	err := r.db.Find(&tasks).Error
+	return tasks, err
 }
 
 func (r *TaskRepositoryImpl) Update(task *models.Task) error {

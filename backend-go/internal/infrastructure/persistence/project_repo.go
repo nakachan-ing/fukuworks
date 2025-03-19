@@ -20,18 +20,14 @@ func (r *ProjectRepositoryImpl) Create(project *models.Project) error {
 
 func (r *ProjectRepositoryImpl) FindByID(id uint) (*models.Project, error) {
 	var project models.Project
-	if err := r.db.First(project, id).Error; err != nil {
-		return nil, err
-	}
-	return &project, nil
+	err := r.db.First(&project, id).Error
+	return &project, err
 }
 
 func (r *ProjectRepositoryImpl) FindAll() ([]models.Project, error) {
 	var projects []models.Project
-	if err := r.db.Find(&projects).Error; err != nil {
-		return nil, err
-	}
-	return projects, nil
+	err := r.db.Find(&projects).Error
+	return projects, err
 }
 
 func (r *ProjectRepositoryImpl) Update(project *models.Project) error {
