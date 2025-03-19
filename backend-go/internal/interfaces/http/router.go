@@ -13,7 +13,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	userHandler := NewUserHandler(userRepo)
 	router.GET("/users", userHandler.GetUsers)
 	router.GET("/users/:id", userHandler.GetUserByID)
-
+	router.POST("/users", userHandler.PostUser)
 	return router
 
 }

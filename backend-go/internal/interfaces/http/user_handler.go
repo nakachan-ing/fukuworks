@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
 )
 
@@ -51,4 +52,30 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		Email: user.Email,
 	}
 	c.IndentedJSON(http.StatusOK, userResponse)
+}
+
+func (h *UserHandler) PostUser(c *gin.Context) {
+	var userRequest dto.UserCreateRequest
+	if err := c.BindJSON(&userRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	}
+
+	newUser := models.User{
+		Name:  userRequest.Name,
+		Email: userRequest.Email,
+	}
+
+	err := h.userRepo.Create(&newUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	}
+
+	userResponse := dto.UserResponse{
+		ID:    newUser.ID,
+		Name:  newUser.Name,
+		Email: newUser.Email,
+	}
+
+	c.IndentedJSON(http.StatusCreated, userResponse)
+
 }
