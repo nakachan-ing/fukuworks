@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"time"
+
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
 	"gorm.io/gorm"
@@ -35,5 +37,15 @@ func (r *UserRepositoryImpl) Update(user *models.User) error {
 }
 
 func (r *UserRepositoryImpl) Delete(id uint) error {
-	return nil
+	var user models.User
+	if err := r.db.Preload("Projects.Tasks").First(&user, id).Error; err != nil {
+		return err
+	}
+
+	for _, project := range user.Projects {
+		r.db.Model(&models.Task{}).Where("project_id = ?", project.ID).Update("deleted_at", gorm.DeletedAt{Time: time.Now(), Valid: true})
+		r.db.Model(&models.Project{}).Where("id = ?", project.ID).Update("deleted_at", gorm.DeletedAt{Time: time.Now(), Valid: true})
+	}
+
+	return r.db.Model(&models.User{}).Where("id = ?", id).Update("deleted_at", gorm.DeletedAt{Time: time.Now(), Valid: true}).Error
 }
