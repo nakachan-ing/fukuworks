@@ -12,6 +12,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	userRepo := persistence.NewUserRepository(db)
 	userHandler := NewUserHandler(userRepo)
 	router.GET("/users", userHandler.GetUsers)
+	router.GET("/users/:id", userHandler.GetUserByID)
 
 	return router
 
