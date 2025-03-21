@@ -77,5 +77,34 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, userResponse)
+}
 
+func (h *UserHandler) UpdateUserByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	}
+
+	var userRequest dto.UserUpdateRequest
+	if err := c.BindJSON(&userRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	}
+
+	updatedUser := models.User{
+		Name:  userRequest.Name,
+		Email: userRequest.Email,
+	}
+
+	err = h.userRepo.Update(uint(id), &updatedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	}
+
+	userResponse := dto.UserResponse{
+		ID:    uint(id),
+		Name:  updatedUser.Name,
+		Email: updatedUser.Email,
+	}
+
+	c.IndentedJSON(http.StatusCreated, userResponse)
 }

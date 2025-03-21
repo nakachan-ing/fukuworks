@@ -32,8 +32,17 @@ func (r *UserRepositoryImpl) FindAll() ([]models.User, error) {
 	return users, err
 }
 
-func (r *UserRepositoryImpl) Update(user *models.User) error {
-	return nil
+func (r *UserRepositoryImpl) Update(id uint, user *models.User) error {
+	existedUser, err := r.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	updateData := map[string]interface{}{
+		"name":  user.Name,
+		"email": user.Email,
+	}
+	return r.db.Model(existedUser).Updates(updateData).Error
 }
 
 func (r *UserRepositoryImpl) Delete(id uint) error {
