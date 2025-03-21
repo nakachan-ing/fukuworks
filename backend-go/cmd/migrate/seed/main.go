@@ -24,8 +24,8 @@ func main() {
 
 	userRepo := persistence.NewUserRepository(db)
 	users := []models.User{
-		{Name: "中田恭大", Email: "jagbvg.eptpeox@gmail.com"},
-		{Name: "Kyota Nakada", Email: "epms-su-en.icloud.com"},
+		{Name: "nakachan-ing", Email: "hogehoge@gmail.com"},
+		{Name: "nakachan", Email: "hogehoge.icloud.com"},
 	}
 	for _, user := range users {
 		userRepo.Create(&user)

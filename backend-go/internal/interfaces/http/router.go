@@ -11,11 +11,19 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	userRepo := persistence.NewUserRepository(db)
 	userHandler := NewUserHandler(userRepo)
-	router.GET("/users", userHandler.GetUsers)
-	router.GET("/users/:id", userHandler.GetUserByID)
-	router.POST("/users", userHandler.PostUser)
-	router.PATCH("/users/:id", userHandler.UpdateUserByID)
-	router.DELETE("/users/:id", userHandler.DeleteUserByID)
+
+	// for user
+	router.POST("/users", userHandler.PostUser)         // for user
+	router.GET("/:user", userHandler.GetUser)           // for user
+	router.PATCH("/:user", userHandler.UpdateUser)      // for user
+	router.DELETE("/:user", userHandler.SoftDeleteUser) // for user
+
+	// for owner
+	api := router.Group("/api")
+	{
+		api.GET("/users", userHandler.GetAllUsers)           // for owner
+		api.DELETE("/users/:id", userHandler.HardDeleteUser) // for owner
+	}
 	return router
 
 }
