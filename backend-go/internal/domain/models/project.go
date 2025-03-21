@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,15 +20,17 @@ type Project struct {
 	Tasks        []Task `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE"`
 }
 
-const (
-	StatusOpen       = "Open"
-	StatusInProgress = "In Progress"
-	StatusCompleted  = "Completed"
-	StatusCanceled   = "Canceled"
-)
+var allowedStatuses = map[string]bool{
+	"Open":        true,
+	"In progress": true,
+	"Completed":   true,
+	"Canceled":    true,
+}
 
-func (p *Project) SetStatus(status string) {
-	if status == StatusOpen || status == StatusInProgress || status == StatusCompleted || status == StatusCanceled {
-		p.Status = status
+func (p *Project) SetStatus(status string) error {
+	if !allowedStatuses[status] {
+		return errors.New("invalid status" + status)
 	}
+	p.Status = status
+	return nil
 }
