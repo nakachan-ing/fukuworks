@@ -22,13 +22,17 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.DELETE("/:user", userHandler.SoftDeleteUser) // for user
 
 	router.POST("/projects", projectHandler.PostProject)
-	router.GET("/:user/:project", projectHandler.GetProject) // for user
+	router.GET("/:user/projects/:id", projectHandler.GetProject) // for user
+	router.GET("/:user/projects", projectHandler.GetAllProjectsByUser)
+	router.PATCH("/:user/:projects/:id", projectHandler.UpdateProject) // for user
+	router.DELETE("/:user/:project", projectHandler.SoftDeleteProject) // for user
 
 	// for owner
 	api := router.Group("/api")
 	{
 		api.GET("/users", userHandler.GetAllUsers)           // for owner
 		api.DELETE("/users/:id", userHandler.HardDeleteUser) // for owner
+
 	}
 	return router
 

@@ -2,7 +2,7 @@ package dto
 
 type ProjectCreateRequest struct {
 	Title        string  `json:"title" binding:"required"`
-	Description  string  `json:"description" binding:"required"`
+	Description  string  `json:"description"`
 	Platform     string  `json:"platform" binding:"required"`
 	Client       string  `json:"client" binding:"required"`
 	EstimatedFee float64 `json:"estimated_fee" binding:"required"`
@@ -12,7 +12,7 @@ type ProjectCreateRequest struct {
 
 type ProjectUpdateRequest struct {
 	Title        string  `json:"title" binding:"required"`
-	Description  string  `json:"description" binding:"required"`
+	Description  string  `json:"description"`
 	Platform     string  `json:"platform" binding:"required"`
 	Client       string  `json:"client" binding:"required"`
 	EstimatedFee float64 `json:"estimated_fee" binding:"required"`
@@ -21,7 +21,7 @@ type ProjectUpdateRequest struct {
 }
 
 type ProjectResponse struct {
-	ID           uint    `json:"id"`
+	Number       uint    `json:"project_id"`
 	Title        string  `json:"title"`
 	Description  string  `json:"description"`
 	Platform     string  `json:"platform"`

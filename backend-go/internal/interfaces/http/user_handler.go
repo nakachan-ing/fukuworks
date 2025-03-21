@@ -23,6 +23,7 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	var userRequest dto.UserCreateRequest
 	if err := c.BindJSON(&userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
 	newUser := models.User{
@@ -33,6 +34,7 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	err := h.userRepo.Create(&newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
 	}
 
 	userResponse := dto.UserResponse{
@@ -74,6 +76,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	var userRequest dto.UserUpdateRequest
 	if err := c.BindJSON(&userRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
 	targetUser := models.User{
@@ -83,7 +86,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	updatedUser, err := h.userRepo.Update(userName, &targetUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		return
 	}
 
 	userResponse := dto.UserResponse{
@@ -106,6 +110,7 @@ func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	err := h.userRepo.SoftDelete(userName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		return
 	}
 
 	c.Status(http.StatusNoContent)
@@ -136,11 +141,13 @@ func (h *UserHandler) HardDeleteUser(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
 	err = h.userRepo.HardDelete(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		return
 	}
 
 	c.Status(http.StatusNoContent)

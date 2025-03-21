@@ -20,37 +20,64 @@ func (r *ProjectRepositoryImpl) Create(project *models.Project) error {
 	if err := project.SetStatus(project.Status); err != nil {
 		return err
 	}
+	var maxNumber uint
+	r.db.Model(&models.Project{}).
+		Where("user_id = ?", project.UserID).
+		Select("COALESCE(MAX(number), 0)").Scan(&maxNumber)
+
+	project.Number = maxNumber + 1
 
 	return r.db.Create(project).Error
 }
 
-func (r *ProjectRepositoryImpl) Find(projectName string) (*models.Project, error) {
+func (r *ProjectRepositoryImpl) Find(userName string, id uint) (*models.Project, error) {
+	var user models.User
+	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
+		return nil, err
+	}
+
 	var project models.Project
-	err := r.db.Where("title = ?", projectName).First(&project).Error
-	return &project, err
+	if err := r.db.Where("number = ? AND user_id = ?", id, user.ID).First(&project).Error; err != nil {
+		return nil, err
+	}
+
+	return &project, nil
 }
 
-func (r *ProjectRepositoryImpl) FindAll() ([]models.Project, error) {
+func (r *ProjectRepositoryImpl) FindAll(userName string) ([]models.Project, error) {
+	var user models.User
+	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
+		return nil, err
+	}
+
 	var projects []models.Project
-	err := r.db.Find(&projects).Error
-	return projects, err
+	if err := r.db.Where("user_id = ?", user.ID).Find(&projects).Error; err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
-func (r *ProjectRepositoryImpl) Update(projectName string, project *models.Project) (*models.Project, error) {
-	// existedProject, err := r.Find(projectName)
-	// if err != nil {
-	// 	return nil, err
-	// }
+func (r *ProjectRepositoryImpl) Update(userName string, projectName string, id uint, project *models.Project) (*models.Project, error) {
+	existedProject, err := r.Find(userName, id)
+	if err != nil {
+		return nil, err
+	}
 
-	// updateData := map[string]interface{}{
-	// 	"name":  e.Name,
-	// 	"email": user.Email,
-	// }
-	return nil, nil
+	updateData := map[string]interface{}{
+		"title":         project.Title,
+		"description":   project.Description,
+		"platform":      project.Platform,
+		"client":        project.Client,
+		"estimated_fee": project.EstimatedFee,
+		"status":        project.Status,
+		"deadline":      project.Deadline,
+	}
+	return existedProject, r.db.Model(existedProject).Updates(updateData).Error
 }
 
-func (r *ProjectRepositoryImpl) SoftDelete(projectName string) error {
-	project, err := r.Find(projectName)
+func (r *ProjectRepositoryImpl) SoftDelete(userName string, id uint) error {
+	project, err := r.Find(userName, id)
 	if err != nil {
 		return err
 	}

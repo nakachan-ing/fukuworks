@@ -10,6 +10,7 @@ import (
 type Project struct {
 	gorm.Model
 	UserID       uint
+	Number       uint
 	Title        string
 	Description  string
 	Platform     string
