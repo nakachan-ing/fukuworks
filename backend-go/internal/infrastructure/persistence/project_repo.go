@@ -30,7 +30,7 @@ func (r *ProjectRepositoryImpl) FindAll() ([]models.Project, error) {
 	return projects, err
 }
 
-func (r *ProjectRepositoryImpl) Update(project *models.Project) error {
+func (r *ProjectRepositoryImpl) Update(id uint, project *models.Project) error {
 	return nil
 }
 
