@@ -44,7 +44,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 
 	user, err := h.userRepo.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
 	}
 	userResponse := dto.UserResponse{
 		ID:    user.ID,
@@ -107,4 +107,18 @@ func (h *UserHandler) UpdateUserByID(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, userResponse)
+}
+
+func (h *UserHandler) DeleteUserByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	}
+
+	err = h.userRepo.Delete(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+	}
+
+	c.Status(http.StatusNoContent)
 }

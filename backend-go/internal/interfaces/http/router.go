@@ -15,6 +15,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.GET("/users/:id", userHandler.GetUserByID)
 	router.POST("/users", userHandler.PostUser)
 	router.PATCH("/users/:id", userHandler.UpdateUserByID)
+	router.DELETE("/users/:id", userHandler.DeleteUserByID)
 	return router
 
 }
