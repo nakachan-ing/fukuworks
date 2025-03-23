@@ -1,11 +1,13 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
@@ -19,18 +21,49 @@ func NewProjectHandler(projectRepo repositories.ProjectRepository) *ProjectHandl
 	return &ProjectHandler{projectRepo: projectRepo}
 }
 
+func bindAndValidate(c *gin.Context, req interface{}) bool {
+	if err := c.ShouldBindJSON(req); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			errors := make([]map[string]string, len(ve))
+			for i, fe := range ve {
+				errors[i] = map[string]string{
+					"field":   fe.Field(),
+					"message": validationErrorMessage(fe),
+				}
+			}
+			c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		return false
+	}
+	return true
+}
+
+func validationErrorMessage(fe validator.FieldError) string {
+	switch fe.Tag() {
+	case "required":
+		return "is required"
+	case "gte":
+		return "must be greater than or equal to " + fe.Param()
+	default:
+		return "is invalid"
+	}
+}
+
 // for user
 func (h *ProjectHandler) PostProject(c *gin.Context) {
+	userName := c.Param("user")
 	var projectRequest dto.ProjectCreateRequest
 
-	if err := c.BindJSON(&projectRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Something is invalid"})
+	if !bindAndValidate(c, &projectRequest) {
 		return
 	}
 
 	parsedTime, err := time.Parse("2006-01-02", projectRequest.Deadline)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Date format is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date format is invalid (yyyy-MM-dd)"})
 		return
 	}
 
@@ -44,9 +77,8 @@ func (h *ProjectHandler) PostProject(c *gin.Context) {
 		Deadline:     parsedTime,
 	}
 
-	err = h.projectRepo.Create(&newProject)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	if err := h.projectRepo.Create(userName, &newProject); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create project"})
 		return
 	}
 
@@ -69,11 +101,12 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
 	project, err := h.projectRepo.Find(userName, uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Project not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		return
 	}
 
@@ -97,17 +130,17 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
 	var projectRequest dto.ProjectUpdateRequest
-	if err := c.BindJSON(&projectRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Something is invalid"})
+	if !bindAndValidate(c, &projectRequest) {
 		return
 	}
 
 	parsedTime, err := time.Parse("2006-01-02", projectRequest.Deadline)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Date format is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date format is invalid (yyyy-MM-dd)"})
 		return
 	}
 
@@ -138,7 +171,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		Deadline:     updatedProject.Deadline.Format("2006-01-02"),
 	}
 
-	c.IndentedJSON(http.StatusCreated, projectResponse)
+	c.IndentedJSON(http.StatusOK, projectResponse)
 
 }
 
@@ -147,11 +180,11 @@ func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		return
 	}
 
-	err = h.projectRepo.SoftDelete(userName, uint(id))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+	if err := h.projectRepo.SoftDelete(userName, uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project"})
 		return
 	}
 
@@ -163,7 +196,7 @@ func (h *ProjectHandler) GetAllProjectsByUser(c *gin.Context) {
 	userName := c.Param("user")
 	projects, err := h.projectRepo.FindAll(userName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get projects"})
 		return
 	}
 
@@ -190,9 +223,8 @@ func (h *ProjectHandler) HardDeleteUser(c *gin.Context) {
 		return
 	}
 
-	err = h.projectRepo.HardDelete(uint(id))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+	if err := h.projectRepo.HardDelete(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
 

@@ -16,15 +16,21 @@ func NewProjectRepository(db *gorm.DB) repositories.ProjectRepository {
 	return &ProjectRepositoryImpl{db}
 }
 
-func (r *ProjectRepositoryImpl) Create(project *models.Project) error {
+func (r *ProjectRepositoryImpl) Create(userName string, project *models.Project) error {
+	var user models.User
+	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
+		return err
+	}
+
 	if err := project.SetStatus(project.Status); err != nil {
 		return err
 	}
 	var maxNumber uint
 	r.db.Model(&models.Project{}).
-		Where("user_id = ?", project.UserID).
+		Where("user_id = ?", user.ID).
 		Select("COALESCE(MAX(number), 0)").Scan(&maxNumber)
 
+	project.UserID = user.ID
 	project.Number = maxNumber + 1
 
 	return r.db.Create(project).Error

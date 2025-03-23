@@ -55,9 +55,8 @@ func main() {
 			Deadline:     time.Date(2025, 6, 1, 9, 0, 0, 0, time.Local),
 		},
 	}
-	for _, project := range projects {
-		projectRepo.Create(&project)
-	}
+	projectRepo.Create("nakachan-ing", &projects[0])
+	projectRepo.Create("nakachan", &projects[1])
 
 	log.Println("Seeding completed!")
 

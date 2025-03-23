@@ -5,7 +5,7 @@ type ProjectCreateRequest struct {
 	Description  string  `json:"description"`
 	Platform     string  `json:"platform" binding:"required"`
 	Client       string  `json:"client" binding:"required"`
-	EstimatedFee float64 `json:"estimated_fee" binding:"required"`
+	EstimatedFee float64 `json:"estimated_fee" binding:"gte=0"`
 	Status       string  `json:"status" binding:"required"`
 	Deadline     string  `json:"deadline"`
 }
@@ -15,7 +15,7 @@ type ProjectUpdateRequest struct {
 	Description  string  `json:"description"`
 	Platform     string  `json:"platform" binding:"required"`
 	Client       string  `json:"client" binding:"required"`
-	EstimatedFee float64 `json:"estimated_fee" binding:"required"`
+	EstimatedFee float64 `json:"estimated_fee" binding:"gte=0"`
 	Status       string  `json:"status" binding:"required"`
 	Deadline     string  `json:"deadline"`
 }
