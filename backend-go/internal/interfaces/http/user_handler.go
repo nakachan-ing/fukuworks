@@ -1,10 +1,13 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
@@ -18,11 +21,41 @@ func NewUserHandler(userRepo repositories.UserRepository) *UserHandler {
 	return &UserHandler{userRepo: userRepo}
 }
 
+func userBindAndValidate(c *gin.Context, req interface{}) bool {
+	if err := c.ShouldBindJSON(req); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			errors := make([]map[string]string, len(ve))
+			for i, fe := range ve {
+				errors[i] = map[string]string{
+					"field":   fe.Field(),
+					"message": userValidationErrorMessage(fe),
+				}
+			}
+			c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		return false
+	}
+	return true
+}
+
+func userValidationErrorMessage(fe validator.FieldError) string {
+	switch fe.Tag() {
+	case "required":
+		return "is required"
+	case "email":
+		return "must be a valid email address"
+	default:
+		return "is invalid"
+	}
+}
+
 // for user
 func (h *UserHandler) PostUser(c *gin.Context) {
 	var userRequest dto.UserCreateRequest
-	if err := c.BindJSON(&userRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	if !userBindAndValidate(c, &userRequest) {
 		return
 	}
 
@@ -31,8 +64,7 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 		Email: userRequest.Email,
 	}
 
-	err := h.userRepo.Create(&newUser)
-	if err != nil {
+	if err := h.userRepo.Create(&newUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -48,34 +80,26 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 
 func (h *UserHandler) GetUser(c *gin.Context) {
 	userName := c.Param("user")
-	// id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
-	// }
-
 	user, err := h.userRepo.Find(userName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
 	}
+
 	userResponse := dto.UserResponse{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
 	}
+
 	c.IndentedJSON(http.StatusOK, userResponse)
 }
 
 // for user
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userName := c.Param("user")
-	// id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
-	// }
-
 	var userRequest dto.UserUpdateRequest
-	if err := c.BindJSON(&userRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+	if !userBindAndValidate(c, &userRequest) {
 		return
 	}
 
@@ -96,23 +120,16 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		Email: updatedUser.Email,
 	}
 
-	c.IndentedJSON(http.StatusCreated, userResponse)
+	c.IndentedJSON(http.StatusOK, userResponse)
 }
 
 // for user
 func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	userName := c.Param("user")
-	// id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
-	// }
-
-	err := h.userRepo.SoftDelete(userName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+	if err := h.userRepo.SoftDelete(userName); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
-
 	c.Status(http.StatusNoContent)
 }
 
@@ -130,8 +147,8 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 			ID:        user.ID,
 			Name:      user.Name,
 			Email:     user.Email,
-			CreatedAt: user.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-			UpdatedAt: user.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			CreatedAt: user.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 	c.IndentedJSON(http.StatusOK, userResponse)
@@ -144,9 +161,8 @@ func (h *UserHandler) HardDeleteUser(c *gin.Context) {
 		return
 	}
 
-	err = h.userRepo.HardDelete(uint(id))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
+	if err := h.userRepo.HardDelete(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
 
