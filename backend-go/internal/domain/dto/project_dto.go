@@ -30,3 +30,18 @@ type ProjectResponse struct {
 	Status       string  `json:"status"`
 	Deadline     string  `json:"deadline"`
 }
+
+type ProjectResponseForOwner struct {
+	UserID       uint    `json:"user_id"`
+	Number       uint    `json:"project_id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	Platform     string  `json:"platform"`
+	Client       string  `json:"client"`
+	EstimatedFee float64 `json:"estimated_fee"`
+	Status       string  `json:"status"`
+	Deadline     string  `json:"deadline"`
+	CreatedAt    string  `json:"created_at"`
+	UpdatedAt    string  `json:"updated_at"`
+	DeletedAt    string  `json:"deleted_at"`
+}

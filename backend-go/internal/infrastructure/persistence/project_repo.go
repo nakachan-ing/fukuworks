@@ -117,3 +117,10 @@ func (r *ProjectRepositoryImpl) HardDelete(id uint) error {
 
 	return r.db.Unscoped().Where("id = ?", project.ID).Delete(&models.Project{}).Error
 }
+
+func (r *ProjectRepositoryImpl) FindAllForOwner() ([]models.Project, error) {
+	var projects []models.Project
+	err := r.db.Unscoped().Find(&projects).Error
+
+	return projects, err
+}

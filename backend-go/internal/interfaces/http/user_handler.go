@@ -141,14 +141,15 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	var userResponse []dto.UserOwnerResponse
+	var userResponse []dto.UserResponseForOwner
 	for _, user := range users {
-		userResponse = append(userResponse, dto.UserOwnerResponse{
+		userResponse = append(userResponse, dto.UserResponseForOwner{
 			ID:        user.ID,
 			Name:      user.Name,
 			Email:     user.Email,
 			CreatedAt: user.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
+			DeletedAt: user.DeletedAt.Time.Format(time.RFC3339),
 		})
 	}
 	c.IndentedJSON(http.StatusOK, userResponse)

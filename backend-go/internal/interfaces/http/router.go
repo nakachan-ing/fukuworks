@@ -16,22 +16,24 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	projectHandler := NewProjectHandler(projectRepo)
 
 	// for user
-	router.POST("/users", userHandler.PostUser)         // for user
-	router.GET("/:user", userHandler.GetUser)           // for user
-	router.PATCH("/:user", userHandler.UpdateUser)      // for user
-	router.DELETE("/:user", userHandler.SoftDeleteUser) // for user
+	router.POST("/users", userHandler.PostUser)
+	router.GET("/:user", userHandler.GetUser)
+	router.PATCH("/:user", userHandler.UpdateUser)
+	router.DELETE("/:user", userHandler.SoftDeleteUser)
 
 	router.POST("/:user/projects", projectHandler.PostProject)
-	router.GET("/:user/projects/:id", projectHandler.GetProject) // for user
 	router.GET("/:user/projects", projectHandler.GetAllProjectsByUser)
-	router.PATCH("/:user/:projects/:id", projectHandler.UpdateProject) // for user
-	router.DELETE("/:user/:project", projectHandler.SoftDeleteProject) // for user
+	router.GET("/:user/projects/:id", projectHandler.GetProject)
+	router.PATCH("/:user/:projects/:id", projectHandler.UpdateProject)
+	router.DELETE("/:user/:project/:id", projectHandler.SoftDeleteProject)
 
 	// for owner
 	api := router.Group("/api")
 	{
-		api.GET("/users", userHandler.GetAllUsers)           // for owner
-		api.DELETE("/users/:id", userHandler.HardDeleteUser) // for owner
+		api.GET("/users", userHandler.GetAllUsers)
+		api.DELETE("/users/:id", userHandler.HardDeleteUser)
+		api.GET("/projects", projectHandler.FindAllProjectsForOwner)
+		api.DELETE("/projects/:id", projectHandler.HardDeleteProject)
 
 	}
 	return router

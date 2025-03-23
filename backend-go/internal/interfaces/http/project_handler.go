@@ -21,7 +21,7 @@ func NewProjectHandler(projectRepo repositories.ProjectRepository) *ProjectHandl
 	return &ProjectHandler{projectRepo: projectRepo}
 }
 
-func bindAndValidate(c *gin.Context, req interface{}) bool {
+func projectBindAndValidate(c *gin.Context, req interface{}) bool {
 	if err := c.ShouldBindJSON(req); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
@@ -29,7 +29,7 @@ func bindAndValidate(c *gin.Context, req interface{}) bool {
 			for i, fe := range ve {
 				errors[i] = map[string]string{
 					"field":   fe.Field(),
-					"message": validationErrorMessage(fe),
+					"message": projectValidationErrorMessage(fe),
 				}
 			}
 			c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
@@ -41,7 +41,7 @@ func bindAndValidate(c *gin.Context, req interface{}) bool {
 	return true
 }
 
-func validationErrorMessage(fe validator.FieldError) string {
+func projectValidationErrorMessage(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
 		return "is required"
@@ -57,7 +57,7 @@ func (h *ProjectHandler) PostProject(c *gin.Context) {
 	userName := c.Param("user")
 	var projectRequest dto.ProjectCreateRequest
 
-	if !bindAndValidate(c, &projectRequest) {
+	if !projectBindAndValidate(c, &projectRequest) {
 		return
 	}
 
@@ -94,6 +94,30 @@ func (h *ProjectHandler) PostProject(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, projectResponse)
+}
+
+func (h *ProjectHandler) GetAllProjectsByUser(c *gin.Context) {
+	userName := c.Param("user")
+	projects, err := h.projectRepo.FindAll(userName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get projects"})
+		return
+	}
+
+	var projectResponse []dto.ProjectResponse
+	for _, project := range projects {
+		projectResponse = append(projectResponse, dto.ProjectResponse{
+			Number:       project.Number,
+			Title:        project.Title,
+			Description:  project.Description,
+			Platform:     project.Platform,
+			Client:       project.Client,
+			EstimatedFee: project.EstimatedFee,
+			Status:       project.Status,
+			Deadline:     project.Deadline.Format("2006-01-02"),
+		})
+	}
+	c.IndentedJSON(http.StatusOK, projectResponse)
 }
 
 func (h *ProjectHandler) GetProject(c *gin.Context) {
@@ -134,7 +158,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	}
 
 	var projectRequest dto.ProjectUpdateRequest
-	if !bindAndValidate(c, &projectRequest) {
+	if !projectBindAndValidate(c, &projectRequest) {
 		return
 	}
 
@@ -175,6 +199,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 
 }
 
+// for user
 func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 	userName := c.Param("user")
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
@@ -192,31 +217,8 @@ func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 
 }
 
-func (h *ProjectHandler) GetAllProjectsByUser(c *gin.Context) {
-	userName := c.Param("user")
-	projects, err := h.projectRepo.FindAll(userName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get projects"})
-		return
-	}
-
-	var projectResponse []dto.ProjectResponse
-	for _, project := range projects {
-		projectResponse = append(projectResponse, dto.ProjectResponse{
-			Number:       project.Number,
-			Title:        project.Title,
-			Description:  project.Description,
-			Platform:     project.Platform,
-			Client:       project.Client,
-			EstimatedFee: project.EstimatedFee,
-			Status:       project.Status,
-			Deadline:     project.Deadline.Format("2006-01-02"),
-		})
-	}
-	c.IndentedJSON(http.StatusOK, projectResponse)
-}
-
-func (h *ProjectHandler) HardDeleteUser(c *gin.Context) {
+// for owner
+func (h *ProjectHandler) HardDeleteProject(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
@@ -229,4 +231,31 @@ func (h *ProjectHandler) HardDeleteUser(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (h *ProjectHandler) FindAllProjectsForOwner(c *gin.Context) {
+	projects, err := h.projectRepo.FindAllForOwner()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get all users"})
+		return
+	}
+
+	var projectResponse []dto.ProjectResponseForOwner
+	for _, project := range projects {
+		projectResponse = append(projectResponse, dto.ProjectResponseForOwner{
+			UserID:       project.UserID,
+			Number:       project.Number,
+			Title:        project.Title,
+			Description:  project.Description,
+			Platform:     project.Platform,
+			Client:       project.Client,
+			EstimatedFee: project.EstimatedFee,
+			Status:       project.Status,
+			Deadline:     project.Deadline.Format("2006-01-02"),
+			CreatedAt:    project.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    project.UpdatedAt.Format(time.RFC3339),
+			DeletedAt:    project.DeletedAt.Time.Format(time.RFC3339),
+		})
+	}
+	c.IndentedJSON(http.StatusOK, projectResponse)
 }
