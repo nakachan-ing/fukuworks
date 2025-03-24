@@ -10,8 +10,8 @@
 | 6  | `/:user`         | DELETE   | ユーザー論理削除   | `nakachan-ing`                       | 204 No Content         |
 | 7  | `/login`         | POST     | ログイン成功        | name, password                | 200 OK + トークン       |
 | 8  | `/login`         | POST     | ログイン失敗        | 間違った name/password        | 401 Unauthorized       |
-| 9  | `/api/users`     | GET      | 全ユーザー取得（管理）| なし                          | 200 OK + 配列          |
-| 10 | `/api/users/:id` | DELETE   | 物理削除（管理）     | userID                        | 204 No Content         |
+| 9  | `/admin/users`     | GET      | 全ユーザー取得（管理）| なし                          | 200 OK + 配列          |
+| 10 | `/admin/users/:id` | DELETE   | 物理削除（管理）     | userID                        | 204 No Content         |
 
 ---
 
