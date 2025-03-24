@@ -44,7 +44,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 		api.GET("/projects", projectHandler.GetAllProjectsForOwner)
 		api.DELETE("/projects/:id", projectHandler.HardDeleteProject)
 		api.GET("/tasks", taskHandler.GetAllTasksForOwner)
-		api.DELETE("/tasks/:id")
+		api.DELETE("/tasks/:id", taskHandler.HardDeleteTask)
 	}
 	return router
 
