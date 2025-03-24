@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/infrastructure/persistence"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/interfaces/http/middleware"
 	"gorm.io/gorm"
 )
 
@@ -21,23 +22,32 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	// ==============================================================================
 	// for user
+
+	// 認証なしで使えるパス（公開）
 	router.POST("/signup", userHandler.PostUser)
 	router.POST("/login", userHandler.Login)
-	router.GET("/:user", userHandler.GetUser)
-	router.PATCH("/:user", userHandler.UpdateUser)
-	router.DELETE("/:user", userHandler.SoftDeleteUser)
 
-	router.POST("/:user/projects", projectHandler.PostProject)
-	router.GET("/:user/projects", projectHandler.GetAllProjectsByUser)
-	router.GET("/:user/projects/:pid", projectHandler.GetProject)
-	router.PATCH("/:user/projects/:pid", projectHandler.UpdateProject)
-	router.DELETE("/:user/projects/:pid", projectHandler.SoftDeleteProject)
+	// 認証が必要なパス
+	authorized := router.Group("/:user")
+	authorized.Use(middleware.AuthMiddleware())
+	{
+		authorized.GET("", userHandler.GetUser)
+		authorized.PATCH("", userHandler.UpdateUser)
+		authorized.DELETE("", userHandler.SoftDeleteUser)
 
-	router.POST("/:user/projects/:pid/tasks", taskHandler.PostTask)
-	router.GET("/:user/projects/:pid/tasks", taskHandler.GetAllTasksByProject)
-	router.GET("/:user/projects/:pid/tasks/:tid", taskHandler.GetTask)
-	router.PATCH("/:user/projects/:pid/tasks/:tid", taskHandler.UpdateTask)
-	router.DELETE("/:user/projects/:pid/tasks/:tid", taskHandler.SoftDeleteTask)
+		authorized.POST("/projects", projectHandler.PostProject)
+		authorized.GET("/projects", projectHandler.GetAllProjectsByUser)
+		authorized.GET("/projects/:pid", projectHandler.GetProject)
+		authorized.PATCH("/projects/:pid", projectHandler.UpdateProject)
+		authorized.DELETE("/projects/:pid", projectHandler.SoftDeleteProject)
+
+		authorized.POST("/projects/:pid/tasks", taskHandler.PostTask)
+		authorized.GET("/projects/:pid/tasks", taskHandler.GetAllTasksByProject)
+		authorized.GET("/projects/:pid/tasks/:tid", taskHandler.GetTask)
+		authorized.PATCH("/projects/:pid/tasks/:tid", taskHandler.UpdateTask)
+		authorized.DELETE("/projects/:pid/tasks/:tid", taskHandler.SoftDeleteTask)
+	}
+
 	// ==============================================================================
 
 	// ==============================================================================
