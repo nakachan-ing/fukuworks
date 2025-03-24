@@ -1,13 +1,20 @@
 package dto
 
 type UserCreateRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 }
 
 type UserUpdateRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password"` // 任意（空なら変更なし）
+}
+
+type LoginRequest struct {
+	Name     string `json:"name" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type UserResponse struct {

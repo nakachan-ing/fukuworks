@@ -81,8 +81,9 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	}
 
 	newUser := models.User{
-		Name:  userRequest.Name,
-		Email: userRequest.Email,
+		Name:     userRequest.Name,
+		Email:    userRequest.Email,
+		Password: userRequest.Password,
 	}
 
 	if err := h.userRepo.Create(&newUser); err != nil {
@@ -99,6 +100,23 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, userResponse)
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var loginReq dto.LoginRequest
+	if !userBindAndValidate(c, &loginReq) {
+		return
+	}
+
+	user, err := h.userRepo.Find(loginReq.Name)
+	if err != nil || user.Password != loginReq.Password {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	// 仮のトークンを返す（JWT対応は今後）
+	token := "mock-token-for-" + user.Name
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 func (h *UserHandler) GetUser(c *gin.Context) {
@@ -120,7 +138,6 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, userResponse)
 }
 
-// for user
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userName := c.Param("user")
 	var userRequest dto.UserUpdateRequest
@@ -129,8 +146,9 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	targetUser := models.User{
-		Name:  userRequest.Name,
-		Email: userRequest.Email,
+		Name:     userRequest.Name,
+		Email:    userRequest.Email,
+		Password: userRequest.Password,
 	}
 
 	updatedUser, err := h.userRepo.Update(userName, &targetUser)
@@ -150,7 +168,6 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, userResponse)
 }
 
-// for user
 func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	userName := c.Param("user")
 	if err := h.userRepo.SoftDelete(userName); err != nil {
@@ -159,8 +176,6 @@ func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
-
-// ==================================================================================================================
 
 // ==================================================================================================================
 // for owner

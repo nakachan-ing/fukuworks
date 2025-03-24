@@ -22,6 +22,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	// ==============================================================================
 	// for user
 	router.POST("/signup", userHandler.PostUser)
+	router.POST("/login", userHandler.Login)
 	router.GET("/:user", userHandler.GetUser)
 	router.PATCH("/:user", userHandler.UpdateUser)
 	router.DELETE("/:user", userHandler.SoftDeleteUser)
