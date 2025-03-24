@@ -52,6 +52,7 @@ func taskValidationErrorMessage(fe validator.FieldError) string {
 	}
 }
 
+// ==================================================================================================================
 // for user
 func (h *TaskHandler) PostTask(c *gin.Context) {
 	userName := c.Param("user")
@@ -232,6 +233,10 @@ func (h *TaskHandler) SoftDeleteTask(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ==================================================================================================================
+
+// ==================================================================================================================
+// for owner
 func (h *TaskHandler) GetAllTasksForOwner(c *gin.Context) {
 	tasks, err := h.taskRepo.FindAllTasksForOwner()
 	if err != nil {
@@ -272,3 +277,5 @@ func (h *TaskHandler) HardDeleteTask(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// ==================================================================================================================

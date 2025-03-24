@@ -52,6 +52,7 @@ func projectValidationErrorMessage(fe validator.FieldError) string {
 	}
 }
 
+// ==================================================================================================================
 // for user
 func (h *ProjectHandler) PostProject(c *gin.Context) {
 	userName := c.Param("user")
@@ -128,7 +129,7 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 	userName := c.Param("user")
 	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
 		return
 	}
 
@@ -153,12 +154,11 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, projectResponse)
 }
 
-// for user
 func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	userName := c.Param("user")
 	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "project ID is invalid"})
 		return
 	}
 
@@ -203,12 +203,11 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, projectResponse)
 }
 
-// for user
 func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 	userName := c.Param("user")
 	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
 		return
 	}
 
@@ -221,11 +220,14 @@ func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 
 }
 
+// ==================================================================================================================
+
+// ==================================================================================================================
 // for owner
 func (h *ProjectHandler) HardDeleteProject(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
 		return
 	}
 
@@ -264,3 +266,5 @@ func (h *ProjectHandler) GetAllProjectsForOwner(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, projectResponse)
 }
+
+// ==================================================================================================================

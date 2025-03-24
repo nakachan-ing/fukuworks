@@ -8,6 +8,7 @@ import (
 
 func NewRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
+	router.Use(ReservedPathGuard())
 
 	userRepo := persistence.NewUserRepository(db)
 	userHandler := NewUserHandler(userRepo)
@@ -18,8 +19,9 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	taskRepo := persistence.NewTaskRepository(db)
 	taskHandler := NewTaskHandler(taskRepo)
 
+	// ==============================================================================
 	// for user
-	router.POST("/users", userHandler.PostUser)
+	router.POST("/signup", userHandler.PostUser)
 	router.GET("/:user", userHandler.GetUser)
 	router.PATCH("/:user", userHandler.UpdateUser)
 	router.DELETE("/:user", userHandler.SoftDeleteUser)
@@ -35,9 +37,11 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.GET("/:user/projects/:pid/tasks/:tid", taskHandler.GetTask)
 	router.PATCH("/:user/projects/:pid/tasks/:tid", taskHandler.UpdateTask)
 	router.DELETE("/:user/projects/:pid/tasks/:tid", taskHandler.SoftDeleteTask)
+	// ==============================================================================
 
+	// ==============================================================================
 	// for owner
-	api := router.Group("/api")
+	api := router.Group("/admin")
 	{
 		api.GET("/users", userHandler.GetAllUsers)
 		api.DELETE("/users/:id", userHandler.HardDeleteUser)
@@ -46,6 +50,8 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 		api.GET("/tasks", taskHandler.GetAllTasksForOwner)
 		api.DELETE("/tasks/:id", taskHandler.HardDeleteTask)
 	}
+	// ==============================================================================
+
 	return router
 
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,25 @@ func NewUserHandler(userRepo repositories.UserRepository) *UserHandler {
 	return &UserHandler{userRepo: userRepo}
 }
 
+// Reserved words (e.g., for static routes like /login, /admin, etc.)
+var reservedPaths = map[string]bool{
+	"login":  true,
+	"admin":  true,
+	"health": true,
+}
+
+// Middleware to skip reserved paths from user route handling
+func ReservedPathGuard() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		first := strings.Split(strings.TrimLeft(c.Request.URL.Path, "/"), "/")[0]
+		if reservedPaths[first] {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Route not found"})
+			return
+		}
+		c.Next()
+	}
+}
+
 func userBindAndValidate(c *gin.Context, req interface{}) bool {
 	if err := c.ShouldBindJSON(req); err != nil {
 		var ve validator.ValidationErrors
@@ -29,7 +49,7 @@ func userBindAndValidate(c *gin.Context, req interface{}) bool {
 			for i, fe := range ve {
 				errors[i] = map[string]string{
 					"field":   fe.Field(),
-					"message": userValidationErrorMessage(fe),
+					"message": validationErrorMessage(fe),
 				}
 			}
 			c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
@@ -41,7 +61,7 @@ func userBindAndValidate(c *gin.Context, req interface{}) bool {
 	return true
 }
 
-func userValidationErrorMessage(fe validator.FieldError) string {
+func validationErrorMessage(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
 		return "is required"
@@ -52,6 +72,7 @@ func userValidationErrorMessage(fe validator.FieldError) string {
 	}
 }
 
+// ==================================================================================================================
 // for user
 func (h *UserHandler) PostUser(c *gin.Context) {
 	var userRequest dto.UserCreateRequest
@@ -139,6 +160,9 @@ func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ==================================================================================================================
+
+// ==================================================================================================================
 // for owner
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userRepo.FindAll()
