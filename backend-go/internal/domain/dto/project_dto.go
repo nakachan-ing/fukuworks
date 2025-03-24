@@ -29,6 +29,8 @@ type ProjectResponse struct {
 	EstimatedFee float64 `json:"estimated_fee"`
 	Status       string  `json:"status"`
 	Deadline     string  `json:"deadline"`
+	CreatedAt    string  `json:"created_at"`
+	UpdatedAt    string  `json:"updated_at"`
 }
 
 type ProjectResponseForOwner struct {

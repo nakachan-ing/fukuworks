@@ -91,6 +91,8 @@ func (h *ProjectHandler) PostProject(c *gin.Context) {
 		EstimatedFee: newProject.EstimatedFee,
 		Status:       newProject.Status,
 		Deadline:     newProject.Deadline.Format("2006-01-02"),
+		CreatedAt:    newProject.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    newProject.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.IndentedJSON(http.StatusCreated, projectResponse)
@@ -115,6 +117,8 @@ func (h *ProjectHandler) GetAllProjectsByUser(c *gin.Context) {
 			EstimatedFee: project.EstimatedFee,
 			Status:       project.Status,
 			Deadline:     project.Deadline.Format("2006-01-02"),
+			CreatedAt:    project.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    project.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 	c.IndentedJSON(http.StatusOK, projectResponse)
@@ -143,6 +147,8 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 		EstimatedFee: project.EstimatedFee,
 		Status:       project.Status,
 		Deadline:     project.Deadline.Format("2006-01-02"),
+		CreatedAt:    project.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    project.UpdatedAt.Format(time.RFC3339),
 	}
 	c.IndentedJSON(http.StatusOK, projectResponse)
 }
@@ -196,7 +202,6 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, projectResponse)
-
 }
 
 // for user
@@ -233,7 +238,7 @@ func (h *ProjectHandler) HardDeleteProject(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *ProjectHandler) FindAllProjectsForOwner(c *gin.Context) {
+func (h *ProjectHandler) GetAllProjectsForOwner(c *gin.Context) {
 	projects, err := h.projectRepo.FindAllForOwner()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get all users"})

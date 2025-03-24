@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 type Task struct {
 	gorm.Model
 	ProjectID   uint
+	Number      uint
 	Title       string
 	Description string
 	Status      string `gorm:"type:varchar(20)"`
@@ -16,24 +18,30 @@ type Task struct {
 	DueDate     time.Time
 }
 
-const (
-	TaskStatusTodo  = "Todo"
-	TaskStatusDoing = "Doing"
-	TaskStatusDone  = "Done"
-
-	PriorityLow    = "Low"
-	PriorityMedium = "Medium"
-	PriorityHigh   = "High"
-)
-
-func (t *Task) SetStatus(status string) {
-	if status == TaskStatusTodo || status == TaskStatusDoing || status == TaskStatusDone {
-		t.Status = status
-	}
+var allowedTaskStatuses = map[string]bool{
+	"Todo":  true,
+	"Doing": true,
+	"Done":  true,
 }
 
-func (t *Task) SetPriority(priority string) {
-	if priority == PriorityLow || priority == PriorityMedium || priority == PriorityHigh {
-		t.Priority = priority
+var allowedPriorities = map[string]bool{
+	"Low":    true,
+	"Medium": true,
+	"High":   true,
+}
+
+func (t *Task) SetStatus(status string) error {
+	if !allowedTaskStatuses[status] {
+		return errors.New("invalid status" + status)
 	}
+	t.Status = status
+	return nil
+}
+
+func (t *Task) SetPriority(priority string) error {
+	if !allowedPriorities[priority] {
+		return errors.New("invalid priority" + priority)
+	}
+	t.Priority = priority
+	return nil
 }

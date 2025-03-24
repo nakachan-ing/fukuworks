@@ -50,20 +50,6 @@ func (r *ProjectRepositoryImpl) Find(userName string, id uint) (*models.Project,
 	return &project, nil
 }
 
-func (r *ProjectRepositoryImpl) FindAll(userName string) ([]models.Project, error) {
-	var user models.User
-	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	var projects []models.Project
-	if err := r.db.Where("user_id = ?", user.ID).Find(&projects).Error; err != nil {
-		return nil, err
-	}
-
-	return projects, nil
-}
-
 func (r *ProjectRepositoryImpl) Update(userName string, projectName string, id uint, project *models.Project) (*models.Project, error) {
 	existedProject, err := r.Find(userName, id)
 	if err != nil {
@@ -100,6 +86,27 @@ func (r *ProjectRepositoryImpl) SoftDelete(userName string, id uint) error {
 	return r.db.Model(&models.Project{}).Where("id = ?", project.ID).Update("deleted_at", gorm.DeletedAt{Time: time.Now(), Valid: true}).Error
 }
 
+func (r *ProjectRepositoryImpl) FindAll(userName string) ([]models.Project, error) {
+	var user models.User
+	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	var projects []models.Project
+	if err := r.db.Where("user_id = ?", user.ID).Find(&projects).Error; err != nil {
+		return nil, err
+	}
+
+	return projects, nil
+}
+
+func (r *ProjectRepositoryImpl) FindAllForOwner() ([]models.Project, error) {
+	var projects []models.Project
+	err := r.db.Unscoped().Find(&projects).Error
+
+	return projects, err
+}
+
 func (r *ProjectRepositoryImpl) HardDelete(id uint) error {
 	var project models.Project
 	if err := r.db.Unscoped().First(&project, id).Error; err != nil {
@@ -116,11 +123,4 @@ func (r *ProjectRepositoryImpl) HardDelete(id uint) error {
 	}
 
 	return r.db.Unscoped().Where("id = ?", project.ID).Delete(&models.Project{}).Error
-}
-
-func (r *ProjectRepositoryImpl) FindAllForOwner() ([]models.Project, error) {
-	var projects []models.Project
-	err := r.db.Unscoped().Find(&projects).Error
-
-	return projects, err
 }

@@ -9,9 +9,8 @@ type ProjectRepository interface {
 	Update(userName string, projectName string, id uint, project *models.Project) (*models.Project, error)
 	SoftDelete(userName string, id uint) error
 	FindAll(userName string) ([]models.Project, error)
-	FindAllForOwner() ([]models.Project, error)
 
 	// for owner
-
+	FindAllForOwner() ([]models.Project, error)
 	HardDelete(id uint) error
 }
