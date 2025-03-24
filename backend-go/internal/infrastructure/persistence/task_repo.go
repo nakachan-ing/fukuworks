@@ -16,7 +16,7 @@ func NewTaskRepository(db *gorm.DB) repositories.TaskRepository {
 	return &TaskRepositoryImpl{db}
 }
 
-func (r *TaskRepositoryImpl) Create(userName, projectName string, task *models.Task) error {
+func (r *TaskRepositoryImpl) Create(userName string, pid uint, task *models.Task) error {
 
 	// userIDが欲しい
 	var user models.User
@@ -26,7 +26,7 @@ func (r *TaskRepositoryImpl) Create(userName, projectName string, task *models.T
 
 	// projectNameに紐づくprojectIDが欲しい
 	var project models.Project
-	if err := r.db.Where("user_id = ? AND title= ?", user.ID, projectName).First(&project).Error; err != nil {
+	if err := r.db.Where("user_id = ? AND number= ?", user.ID, pid).First(&project).Error; err != nil {
 		return err
 	}
 
@@ -49,7 +49,7 @@ func (r *TaskRepositoryImpl) Create(userName, projectName string, task *models.T
 	return r.db.Create(task).Error
 }
 
-func (r *TaskRepositoryImpl) Find(userName, projectName string, pid, tid uint) (*models.Task, error) {
+func (r *TaskRepositoryImpl) Find(userName string, pid, tid uint) (*models.Task, error) {
 	var user models.User
 	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
 		return nil, err
@@ -68,8 +68,8 @@ func (r *TaskRepositoryImpl) Find(userName, projectName string, pid, tid uint) (
 	return &task, nil
 }
 
-func (r *TaskRepositoryImpl) Update(userName, projectName string, pid, tid uint, task *models.Task) (*models.Task, error) {
-	existedTask, err := r.Find(userName, projectName, pid, tid)
+func (r *TaskRepositoryImpl) Update(userName string, pid, tid uint, task *models.Task) (*models.Task, error) {
+	existedTask, err := r.Find(userName, pid, tid)
 	if err != nil {
 		return nil, err
 	}
@@ -85,15 +85,15 @@ func (r *TaskRepositoryImpl) Update(userName, projectName string, pid, tid uint,
 	return existedTask, r.db.Model(existedTask).Updates(updateData).Error
 }
 
-func (r *TaskRepositoryImpl) SoftDelete(userName, projectName string, pid, tid uint) error {
-	task, err := r.Find(userName, projectName, pid, tid)
+func (r *TaskRepositoryImpl) SoftDelete(userName string, pid, tid uint) error {
+	task, err := r.Find(userName, pid, tid)
 	if err != nil {
 		return err
 	}
 	return r.db.Model(&models.Task{}).Where("id = ?", task.ID).Update("deleted_at", gorm.DeletedAt{Time: time.Now(), Valid: true}).Error
 }
 
-func (r *TaskRepositoryImpl) FindAll(userName, projectName string, pid uint) ([]models.Task, error) {
+func (r *TaskRepositoryImpl) FindAll(userName string, pid uint) ([]models.Task, error) {
 	var user models.User
 	if err := r.db.Where("name = ?", userName).First(&user).Error; err != nil {
 		return nil, err

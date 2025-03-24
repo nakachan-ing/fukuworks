@@ -6,7 +6,7 @@ type ProjectRepository interface {
 	// for user
 	Create(userName string, project *models.Project) error
 	Find(userName string, id uint) (*models.Project, error)
-	Update(userName string, projectName string, id uint, project *models.Project) (*models.Project, error)
+	Update(userName string, id uint, project *models.Project) (*models.Project, error)
 	SoftDelete(userName string, id uint) error
 	FindAll(userName string) ([]models.Project, error)
 

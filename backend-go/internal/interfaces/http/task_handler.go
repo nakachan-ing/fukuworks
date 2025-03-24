@@ -55,7 +55,11 @@ func taskValidationErrorMessage(fe validator.FieldError) string {
 // for user
 func (h *TaskHandler) PostTask(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
+	pid, err := strconv.ParseUint(c.Param("pid"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
+		return
+	}
 	var taskRequest dto.TaskCreateRequest
 
 	if !taskBindAndValidate(c, &taskRequest) {
@@ -76,7 +80,7 @@ func (h *TaskHandler) PostTask(c *gin.Context) {
 		DueDate:     parsedTime,
 	}
 
-	if err := h.taskRepo.Create(userName, projectName, &newTask); err != nil {
+	if err := h.taskRepo.Create(userName, uint(pid), &newTask); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create task"})
 		return
 	}
@@ -95,14 +99,13 @@ func (h *TaskHandler) PostTask(c *gin.Context) {
 
 func (h *TaskHandler) GetAllTasksByProject(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
 	pid, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
 		return
 	}
 
-	tasks, err := h.taskRepo.FindAll(userName, projectName, uint(pid))
+	tasks, err := h.taskRepo.FindAll(userName, uint(pid))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tasks"})
 		return
@@ -126,7 +129,6 @@ func (h *TaskHandler) GetAllTasksByProject(c *gin.Context) {
 
 func (h *TaskHandler) GetTask(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
 	pid, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
@@ -138,7 +140,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskRepo.Find(userName, projectName, uint(pid), uint(tid))
+	task, err := h.taskRepo.Find(userName, uint(pid), uint(tid))
 
 	taskResponse := dto.TaskResponse{
 		Number:      task.Number,
@@ -156,7 +158,6 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
 	pid, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
@@ -187,7 +188,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		DueDate:     parsedTime,
 	}
 
-	updatedTask, err := h.taskRepo.Update(userName, projectName, uint(pid), uint(tid), &targetTask)
+	updatedTask, err := h.taskRepo.Update(userName, uint(pid), uint(tid), &targetTask)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
 		return
@@ -209,7 +210,6 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 
 func (h *TaskHandler) SoftDeleteTask(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
 	pid, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
@@ -221,7 +221,7 @@ func (h *TaskHandler) SoftDeleteTask(c *gin.Context) {
 		return
 	}
 
-	if err := h.taskRepo.SoftDelete(userName, projectName, uint(pid), uint(tid)); err != nil {
+	if err := h.taskRepo.SoftDelete(userName, uint(pid), uint(tid)); err != nil {
 		return
 	}
 

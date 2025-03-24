@@ -156,7 +156,6 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 // for user
 func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	userName := c.Param("user")
-	projectName := c.Param("projects")
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
@@ -184,7 +183,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 		Deadline:     parsedTime,
 	}
 
-	updatedProject, err := h.projectRepo.Update(userName, projectName, uint(id), &targetProject)
+	updatedProject, err := h.projectRepo.Update(userName, uint(id), &targetProject)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project"})
 		return

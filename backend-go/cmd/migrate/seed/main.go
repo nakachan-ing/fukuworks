@@ -42,7 +42,7 @@ func main() {
 			Client:       "個人",
 			EstimatedFee: 0,
 			Status:       "In progress",
-			Deadline:     time.Date(2025, 4, 1, 9, 0, 0, 0, time.Local),
+			Deadline:     time.Date(2025, 5, 31, 0, 0, 0, 0, time.Local),
 		},
 		{
 			UserID:       2,
@@ -52,11 +52,31 @@ func main() {
 			Client:       "個人",
 			EstimatedFee: 0,
 			Status:       "Open",
-			Deadline:     time.Date(2025, 6, 1, 9, 0, 0, 0, time.Local),
+			Deadline:     time.Date(2025, 6, 1, 0, 0, 0, 0, time.Local),
 		},
 	}
 	projectRepo.Create("nakachan-ing", &projects[0])
 	projectRepo.Create("nakachan", &projects[1])
+
+	taskRepo := persistence.NewTaskRepository(db)
+	tasks := []models.Task{
+		{
+			Title:       "Routingの実装",
+			Description: "APIを叩くためのルーティングの実装",
+			Status:      "Todo",
+			Priority:    "High",
+			DueDate:     time.Date(2025, 3, 25, 0, 0, 0, 0, time.Local),
+		},
+		{
+			Title:       "ztl syncコマンドの改修",
+			Description: "S3にアップロード、ダウンロード機能の改修",
+			Status:      "Todo",
+			Priority:    "Medium",
+			DueDate:     time.Date(2025, 4, 30, 0, 0, 0, 0, time.Local),
+		},
+	}
+	taskRepo.Create("nakachan-ing", 1, &tasks[0])
+	taskRepo.Create("nakachan", 2, &tasks[1])
 
 	log.Println("Seeding completed!")
 

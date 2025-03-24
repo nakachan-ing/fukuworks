@@ -50,7 +50,7 @@ func (r *ProjectRepositoryImpl) Find(userName string, id uint) (*models.Project,
 	return &project, nil
 }
 
-func (r *ProjectRepositoryImpl) Update(userName string, projectName string, id uint, project *models.Project) (*models.Project, error) {
+func (r *ProjectRepositoryImpl) Update(userName string, id uint, project *models.Project) (*models.Project, error) {
 	existedProject, err := r.Find(userName, id)
 	if err != nil {
 		return nil, err
