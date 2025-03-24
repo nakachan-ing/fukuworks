@@ -26,14 +26,14 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	router.POST("/:user/projects", projectHandler.PostProject)
 	router.GET("/:user/projects", projectHandler.GetAllProjectsByUser)
-	router.GET("/:user/projects/:id", projectHandler.GetProject)
-	router.PATCH("/:user/projects/:id", projectHandler.UpdateProject)
-	router.DELETE("/:user/project/:id", projectHandler.SoftDeleteProject)
+	router.GET("/:user/projects/:pid", projectHandler.GetProject)
+	router.PATCH("/:user/projects/:pid", projectHandler.UpdateProject)
+	router.DELETE("/:user/projects/:pid", projectHandler.SoftDeleteProject)
 
-	router.POST("/:user/projects/:id/tasks", taskHandler.PostTask)
+	router.POST("/:user/projects/:pid/tasks", taskHandler.PostTask)
 	router.GET("/:user/projects/:pid/tasks", taskHandler.GetAllTasksByProject)
 	router.GET("/:user/projects/:pid/tasks/:tid", taskHandler.GetTask)
-	router.PATCH("/user/projects/:pid/tasks/:tid,", taskHandler.UpdateTask)
+	router.PATCH("/:user/projects/:pid/tasks/:tid", taskHandler.UpdateTask)
 	router.DELETE("/:user/projects/:pid/tasks/:tid", taskHandler.SoftDeleteTask)
 
 	// for owner

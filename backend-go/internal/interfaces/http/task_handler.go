@@ -141,6 +141,10 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 	}
 
 	task, err := h.taskRepo.Find(userName, uint(pid), uint(tid))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
 
 	taskResponse := dto.TaskResponse{
 		Number:      task.Number,

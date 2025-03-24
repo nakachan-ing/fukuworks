@@ -126,7 +126,7 @@ func (h *ProjectHandler) GetAllProjectsByUser(c *gin.Context) {
 
 func (h *ProjectHandler) GetProject(c *gin.Context) {
 	userName := c.Param("user")
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
 		return
@@ -156,7 +156,7 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 // for user
 func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	userName := c.Param("user")
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
 		return
@@ -206,7 +206,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 // for user
 func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 	userName := c.Param("user")
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is invalid"})
 		return
@@ -247,6 +247,7 @@ func (h *ProjectHandler) GetAllProjectsForOwner(c *gin.Context) {
 	var projectResponse []dto.ProjectResponseForOwner
 	for _, project := range projects {
 		projectResponse = append(projectResponse, dto.ProjectResponseForOwner{
+			ID:           project.ID,
 			UserID:       project.UserID,
 			Number:       project.Number,
 			Title:        project.Title,

@@ -34,6 +34,7 @@ type ProjectResponse struct {
 }
 
 type ProjectResponseForOwner struct {
+	ID           uint    `json:"id"`
 	UserID       uint    `json:"user_id"`
 	Number       uint    `json:"project_id"`
 	Title        string  `json:"title"`

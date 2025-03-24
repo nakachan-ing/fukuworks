@@ -76,7 +76,7 @@ func main() {
 		},
 	}
 	taskRepo.Create("nakachan-ing", 1, &tasks[0])
-	taskRepo.Create("nakachan", 2, &tasks[1])
+	taskRepo.Create("nakachan", 1, &tasks[1])
 
 	log.Println("Seeding completed!")
 

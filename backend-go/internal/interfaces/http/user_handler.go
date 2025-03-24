@@ -70,9 +70,11 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	}
 
 	userResponse := dto.UserResponse{
-		ID:    newUser.ID,
-		Name:  newUser.Name,
-		Email: newUser.Email,
+		ID:        newUser.ID,
+		Name:      newUser.Name,
+		Email:     newUser.Email,
+		CreatedAt: newUser.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: newUser.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.IndentedJSON(http.StatusCreated, userResponse)
@@ -87,9 +89,11 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	}
 
 	userResponse := dto.UserResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.IndentedJSON(http.StatusOK, userResponse)
@@ -115,9 +119,11 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	userResponse := dto.UserResponse{
-		ID:    updatedUser.ID,
-		Name:  updatedUser.Name,
-		Email: updatedUser.Email,
+		ID:        updatedUser.ID,
+		Name:      updatedUser.Name,
+		Email:     updatedUser.Email,
+		CreatedAt: updatedUser.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: updatedUser.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.IndentedJSON(http.StatusOK, userResponse)
