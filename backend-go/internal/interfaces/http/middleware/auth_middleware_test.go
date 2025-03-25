@@ -92,8 +92,12 @@ func TestAuthMiddleware_EmptyTokenAfterBearer(t *testing.T) {
 
 func TestAuthMiddleware_ReservedUsername(t *testing.T) {
 	r := gin.Default()
-	r.Use(middleware.ReservedPathGuard()) // ← 忘れずに追加
+	r.Use(middleware.ReservedPathGuard())
 	r.Use(middleware.AuthMiddleware())
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "not authorized"})
+	})
+
 	r.GET("/:user/protected", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Authorized"})
 	})
