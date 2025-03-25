@@ -42,7 +42,7 @@ func TestPostUser_Success(t *testing.T) {
 func TestPostUser_ValidationError(t *testing.T) {
 	r := setupRouterForTest()
 
-	body := `{"email":"invalid@example.com","password":"secret123"}`
+	body := `{"name":"","email":"invalid@example.com","password":"secret123"}`
 	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -90,4 +90,50 @@ func TestLogin_Failure(t *testing.T) {
 
 	assert.Equal(t, httpstd.StatusUnauthorized, loginRes.Code)
 	assert.Contains(t, loginRes.Body.String(), "Invalid credentials")
+}
+
+func TestPostUser_InvalidEmailFormat(t *testing.T) {
+	r := setupRouterForTest()
+
+	// email形式が不正
+	payload := `{"name":"kyota","email":"invalid-email","password":"pass1234"}`
+	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "email")
+}
+
+func TestGetUser_NotFound(t *testing.T) {
+	r := setupRouterForTest()
+
+	req, _ := httpstd.NewRequest("GET", "/unknown", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "not found")
+}
+
+func TestPostUser_Duplicate(t *testing.T) {
+	r := setupRouterForTest()
+
+	// 同じname/emailで2回POSTする
+	payload := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	req1, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+	assert.Equal(t, httpstd.StatusCreated, w1.Code)
+
+	req2, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	assert.Equal(t, httpstd.StatusConflict, w2.Code)
+	assert.Contains(t, w2.Body.String(), "already exists")
 }

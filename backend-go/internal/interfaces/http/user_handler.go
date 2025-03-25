@@ -87,6 +87,10 @@ func (h *UserHandler) PostUser(c *gin.Context) {
 	}
 
 	if err := h.userRepo.Create(&newUser); err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}

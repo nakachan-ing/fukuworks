@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"errors"
 	"time"
 
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
@@ -17,6 +18,10 @@ func NewUserRepository(db *gorm.DB) repositories.UserRepository {
 }
 
 func (r *UserRepositoryImpl) Create(user *models.User) error {
+	var existing models.User
+	if err := r.db.Where("name = ? OR email = ?", user.Name, user.Email).First(&existing).Error; err == nil {
+		return errors.New("user already exists")
+	}
 	return r.db.Create(user).Error
 }
 
