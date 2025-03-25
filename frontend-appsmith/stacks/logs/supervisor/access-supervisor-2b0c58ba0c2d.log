@@ -4997,3 +4997,66 @@ RESULT 886
 processname:editor groupname:editor pid:1949 channel:stdout
 {"level":"info","ts":1742937337.6584744,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"47110","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"]}},"bytes_read":0,"user_id":"","duration":0.000445793,"size":5562,"status":200,"resp_headers":{"Accept-Ranges":["bytes"],"X-Appsmith-Request-Id":["af264bda-5016-44fb-9b94-8e3ec2d62a1d"],"X-Content-Type-Options":["nosniff"],"Vary":["Accept-Encoding"],"Content-Type":["text/html; charset=utf-8"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Content-Length":["5562"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Request-Id":["invalid_request_id"],"Etag":["\"d8pmziypfhdw4ai\""]},"uuid":"af264bda-5016-44fb-9b94-8e3ec2d62a1d"}
 READY
+RESULT 790
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937352.9259572,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"46672","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"Accept":["*/*"],"X-Request-Id":["invalid_request_id"],"User-Agent":["curl/7.68.0"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937352.926008,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+{"level":"debug","ts":1742937352.9260316,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 886
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937352.9261875,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"46672","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"Accept":["*/*"],"User-Agent":["curl/7.68.0"]}},"bytes_read":0,"user_id":"","duration":0.000411497,"size":5562,"status":200,"resp_headers":{"X-Appsmith-Request-Id":["44f8de8c-40dd-4b88-8b01-3ec4a4ef402c"],"Vary":["Accept-Encoding"],"Etag":["\"d8pmziypfhdw4ai\""],"Content-Type":["text/html; charset=utf-8"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Request-Id":["invalid_request_id"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Accept-Ranges":["bytes"],"Content-Length":["5562"],"X-Content-Type-Options":["nosniff"]},"uuid":"44f8de8c-40dd-4b88-8b01-3ec4a4ef402c"}
+READY
+RESULT 648
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937368.1645725,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"42234","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"],"X-Request-Id":["invalid_request_id"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937368.164631,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 885
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937368.164988,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"42234","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"]}},"bytes_read":0,"user_id":"","duration":0.000625244,"size":5562,"status":200,"resp_headers":{"Etag":["\"d8pmziypfhdw4ai\""],"Content-Length":["5562"],"X-Content-Type-Options":["nosniff"],"X-Request-Id":["invalid_request_id"],"Vary":["Accept-Encoding"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Appsmith-Request-Id":["d3960269-0143-45b2-bc45-b3ac1754c88e"],"Content-Type":["text/html; charset=utf-8"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Accept-Ranges":["bytes"]},"uuid":"d3960269-0143-45b2-bc45-b3ac1754c88e"}
+READY
+RESULT 200
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937368.16476,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 790
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937383.5249894,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"50986","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"],"X-Request-Id":["invalid_request_id"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937383.525152,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+{"level":"debug","ts":1742937383.5252628,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 885
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937383.5259817,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"50986","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"]}},"bytes_read":0,"user_id":"","duration":0.00266024,"size":5562,"status":200,"resp_headers":{"Etag":["\"d8pmziypfhdw4ai\""],"Content-Length":["5562"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Request-Id":["invalid_request_id"],"Vary":["Accept-Encoding"],"Content-Type":["text/html; charset=utf-8"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Accept-Ranges":["bytes"],"X-Appsmith-Request-Id":["389aee6f-6e9b-41f5-8fe4-bb0ce1709236"],"X-Content-Type-Options":["nosniff"]},"uuid":"389aee6f-6e9b-41f5-8fe4-bb0ce1709236"}
+READY
+RESULT 788
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937398.775075,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"38306","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"],"X-Request-Id":["invalid_request_id"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937398.775157,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+{"level":"debug","ts":1742937398.775179,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 886
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937398.7754898,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"38306","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"]}},"bytes_read":0,"user_id":"","duration":0.000618468,"size":5562,"status":200,"resp_headers":{"Content-Length":["5562"],"X-Appsmith-Request-Id":["2318372f-a66e-4a78-bcfa-e2047f75ac30"],"X-Request-Id":["invalid_request_id"],"Content-Type":["text/html; charset=utf-8"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Accept-Ranges":["bytes"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Content-Type-Options":["nosniff"],"Vary":["Accept-Encoding"],"Etag":["\"d8pmziypfhdw4ai\""]},"uuid":"2318372f-a66e-4a78-bcfa-e2047f75ac30"}
+READY
+RESULT 789
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937414.0321515,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"57486","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"],"X-Request-Id":["invalid_request_id"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937414.03305,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+{"level":"debug","ts":1742937414.0331178,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 886
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937414.0334568,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"57486","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"Accept":["*/*"],"User-Agent":["curl/7.68.0"]}},"bytes_read":0,"user_id":"","duration":0.001553253,"size":5562,"status":200,"resp_headers":{"Vary":["Accept-Encoding"],"Etag":["\"d8pmziypfhdw4ai\""],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Content-Length":["5562"],"Content-Type":["text/html; charset=utf-8"],"Accept-Ranges":["bytes"],"X-Appsmith-Request-Id":["7ce6250f-d047-4930-a746-f5661d36a522"],"X-Content-Type-Options":["nosniff"],"Content-Security-Policy":["frame-ancestors 'self' *"],"X-Request-Id":["invalid_request_id"]},"uuid":"7ce6250f-d047-4930-a746-f5661d36a522"}
+READY
+RESULT 790
+processname:editor groupname:editor pid:1949 channel:stderr
+{"level":"debug","ts":1742937429.3174357,"logger":"http.handlers.rewrite","msg":"rewrote request","request":{"remote_ip":"::1","remote_port":"51710","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/index.html","headers":{"User-Agent":["curl/7.68.0"],"Accept":["*/*"],"X-Request-Id":["invalid_request_id"]}},"method":"GET","uri":"/index.html"}
+{"level":"debug","ts":1742937429.3174899,"logger":"http.handlers.file_server","msg":"sanitized path join","site_root":"/tmp/appsmith/www","fs":"","request_path":"/index.html","result":"/tmp/appsmith/www/index.html"}
+{"level":"debug","ts":1742937429.317512,"logger":"http.handlers.file_server","msg":"opening file","filename":"/tmp/appsmith/www/index.html"}
+READY
+RESULT 885
+processname:editor groupname:editor pid:1949 channel:stdout
+{"level":"info","ts":1742937429.317682,"logger":"http.log.access.log0","msg":"handled request","request":{"remote_ip":"::1","remote_port":"51710","client_ip":"::1","proto":"HTTP/1.1","method":"GET","host":"localhost","uri":"/","headers":{"Accept":["*/*"],"User-Agent":["curl/7.68.0"]}},"bytes_read":0,"user_id":"","duration":0.000445846,"size":5562,"status":200,"resp_headers":{"Content-Type":["text/html; charset=utf-8"],"Last-Modified":["Tue, 25 Mar 2025 20:41:04 GMT"],"Accept-Ranges":["bytes"],"X-Appsmith-Request-Id":["6a56c08d-4dc7-445f-9081-cc801a054fb4"],"X-Content-Type-Options":["nosniff"],"X-Request-Id":["invalid_request_id"],"Etag":["\"d8pmziypfhdw4ai\""],"Content-Length":["5562"],"Content-Security-Policy":["frame-ancestors 'self' *"],"Vary":["Accept-Encoding"]},"uuid":"6a56c08d-4dc7-445f-9081-cc801a054fb4"}
+READY
