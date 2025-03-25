@@ -1,0 +1,12 @@
+# frontend-appsmith/docker-compose.yml
+version: "3.7"
+
+services:
+  appsmith:
+    image: appsmith/appsmith-ce
+    container_name: appsmith-local
+    ports:
+      - "8080:80"  # ローカルの8080でアクセスできる
+    volumes:
+      - ./stacks:/appsmith-stacks
+    restart: unless-stopped
