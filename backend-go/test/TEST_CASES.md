@@ -1,68 +1,102 @@
-# ✅ FukuWorks API テストケース一覧
+# APIテストケース一覧
 
-## 🧑‍💼 User エンドポイント
+## ✅ USER API
 
-### ✅ 正常系
-| No. | テスト名                        | 説明 |
-|-----|----------------------------------|------|
-| 1   | `TestPostUser_Success`          | ユーザー新規登録（成功） |
-| 2   | `TestLogin_Success`             | ログイン成功（仮トークン発行） |
-| 3   | `TestGetUser`                   | ユーザー情報取得 |
-| 4   | `TestUpdateUser`                | ユーザー情報更新 |
-| 5   | `TestSoftDeleteUser`            | ユーザー論理削除 |
+### 🔹 正常系
 
-### ❌ 異常系
-| No. | テスト名                            | 説明 |
-|-----|--------------------------------------|------|
-| 1   | `TestPostUser_ValidationError`       | バリデーションエラー（name や email 未入力） |
-| 2   | `TestPostUser_InvalidEmailFormat`    | email 形式不正 |
-| 3   | `TestPostUser_Duplicate`             | name/email の重複エラー |
-| 4   | `TestLogin_Failure`                  | ログイン失敗（ユーザー未登録） |
-| 5   | `TestUpdateUser_NotFound`            | 存在しないユーザーの更新 |
-| 6   | `TestSoftDeleteUser_NotFound`        | 存在しないユーザーの削除 |
+| No  | テスト内容                      | Endpoint        | 説明                     |
+|-----|--------------------------------|-----------------|--------------------------|
+| U01 | ユーザー作成（正常）           | POST /signup    | 必須項目を正しく指定    |
+| U02 | ログイン（成功）               | POST /login     | 正しい認証情報を指定    |
+| U03 | ユーザー取得                   | GET /:user      | ログインユーザー本人     |
+| U04 | ユーザー更新                   | PATCH /:user    | 名前・メール変更         |
+| U05 | ユーザー削除（ソフト）         | DELETE /:user   | 対象ユーザーを論理削除   |
 
----
+### 🔹 異常系
 
-## 📁 Project エンドポイント
+| No  | テスト内容                        | Endpoint        | 説明                             |
+|-----|----------------------------------|-----------------|----------------------------------|
+| U06 | 作成時バリデーションエラー       | POST /signup    | name, email, password が空       |
+| U07 | 無効なemail形式                  | POST /signup    | emailが不正                      |
+| U08 | 重複name/email登録               | POST /signup    | 同一ユーザー名/メールの再登録   |
+| U09 | 存在しないユーザー更新/削除     | PATCH /:user, DELETE /:user | ghostuser など存在しない        |
 
-### ✅ 正常系
-| No. | テスト名                            | 説明 |
-|-----|--------------------------------------|------|
-| 1   | `TestPostProject_Success`           | プロジェクト作成 |
-| 2   | `TestUpdateProject_Success`         | プロジェクト更新 |
-| 3   | `TestSoftDeleteProject_Success`     | プロジェクト論理削除 |
-| 4   | `TestGetProject_Success`            | プロジェクト取得 |
+### 🔹 バリデーション
 
-### ❌ 異常系
-| No. | テスト名                                       | 説明 |
-|-----|------------------------------------------------|------|
-| 1   | `TestPostProject_ValidationError`              | 必須項目未入力 |
-| 2   | `TestPostProject_InvalidDeadlineFormat`        | deadline の日付形式不正 |
-| 3   | `TestGetProject_ForbiddenForOtherUser`         | 他人のプロジェクト取得（403）|
-| 4   | `TestUpdateProject_ForbiddenForOtherUser`      | 他人のプロジェクト更新（403）|
-| 5   | `TestSoftDeleteProject_ForbiddenForOtherUser`  | 他人のプロジェクト削除（403）|
-| 6   | `TestUpdateProject_NotFound`                   | 存在しないプロジェクトの更新（404）|
-| 7   | `TestSoftDeleteProject_NotFound`               | 存在しないプロジェクトの削除（404）|
+| フィールド     | 制約内容                      |
+|----------------|-------------------------------|
+| name           | 必須、最大30文字              |
+| email          | 必須、正しい形式、最大255文字 |
+| password       | 必須、8〜64文字               |
 
 ---
 
-## ✅ Task エンドポイント
+## ✅ PROJECT API
 
-### ✅ 正常系
-| No. | テスト名                         | 説明 |
-|-----|----------------------------------|------|
-| 1   | `TestPostTask_Success`          | タスク作成成功 |
-| 2   | `TestUpdateTask_Success`        | タスク更新成功 |
-| 3   | `TestSoftDeleteTask_Success`    | タスク削除成功 |
-| 4   | `TestGetTask_Success`           | タスク取得成功 |
+### 🔹 正常系
 
-### ❌ 異常系
-| No. | テスト名                            | 説明 |
-|-----|--------------------------------------|------|
-| 1   | `TestPostTask_ValidationError`       | 必須フィールド未入力で作成失敗 |
-| 2   | `TestGetTask_Forbidden`              | 他人のタスク取得（403） |
-| 3   | `TestUpdateTask_Forbidden`           | 他人のタスク更新（403） |
-| 4   | `TestSoftDeleteTask_Forbidden`       | 他人のタスク削除（403） |
-| 5   | `TestGetTask_NotFound`               | 存在しないタスク取得（404） |
-| 6   | `TestUpdateTask_NotFound`            | 存在しないタスク更新（404） |
-| 7   | `TestSoftDeleteTask_NotFound`        | 存在しないタスク削除（404） |
+| No  | テスト内容                      | Endpoint                    |
+|-----|-------------------------------|-----------------------------|
+| P01 | プロジェクト作成              | POST /:user/projects        |
+| P02 | プロジェクト取得              | GET /:user/projects/:pid    |
+| P03 | プロジェクト更新              | PATCH /:user/projects/:pid  |
+| P04 | プロジェクト削除（ソフト）    | DELETE /:user/projects/:pid |
+
+### 🔹 異常系
+
+| No  | テスト内容                        | Endpoint                    | 説明                             |
+|-----|----------------------------------|-----------------------------|----------------------------------|
+| P05 | 他人のプロジェクト参照禁止       | GET /otheruser/projects/:pid|
+| P06 | 他人のプロジェクト更新/削除禁止 | PATCH/DELETE /otheruser/... |
+| P07 | 不正な日付形式                  | POST /:user/projects        | deadline = "31-12-2025"         |
+
+### 🔹 バリデーション
+
+| フィールド      | 制約内容                               |
+|-----------------|----------------------------------------|
+| title           | 必須、最大100文字                      |
+| platform        | 任意、最大100文字                      |
+| client          | 任意、最大100文字                      |
+| estimated_fee   | 任意、数値                             |
+| status          | 必須、"Open", "In progress", "Completed", "Canceled" のみ |
+| deadline        | 任意、YYYY-MM-DD 形式                  |
+
+---
+
+## ✅ TASK API
+
+### 🔹 正常系
+
+| No  | テスト内容                      | Endpoint                                |
+|-----|-------------------------------|-----------------------------------------|
+| T01 | タスク作成                     | POST /:user/projects/:pid/tasks         |
+| T02 | タスク取得                     | GET /:user/projects/:pid/tasks/:tid     |
+| T03 | タスク更新                     | PATCH /:user/projects/:pid/tasks/:tid   |
+| T04 | タスク削除（ソフト）           | DELETE /:user/projects/:pid/tasks/:tid  |
+
+### 🔹 異常系
+
+| No  | テスト内容                        | Endpoint                              | 説明                           |
+|-----|----------------------------------|---------------------------------------|--------------------------------|
+| T05 | 他人のタスク参照禁止             | GET /otheruser/projects/1/tasks/1     |
+| T06 | 他人のタスク更新/削除禁止       | PATCH/DELETE /otheruser/...           |
+| T07 | 存在しないタスクの更新/削除     | PATCH/DELETE /.../tasks/999           |
+| T08 | 不正なstatus/priorityの指定      | POST /:user/projects/:pid/tasks       |
+
+### 🔹 バリデーション
+
+| フィールド     | 制約内容                               |
+|----------------|----------------------------------------|
+| title          | 必須、最大100文字                      |
+| description    | 任意、最大500文字                      |
+| status         | 必須、"Open", "In progress", "Completed", "Canceled" のみ |
+| priority       | 必須、"Low", "Medium", "High" のみ     |
+| due_date       | 任意、YYYY-MM-DD 形式                  |
+
+---
+
+## その他
+
+- 認可ミドルウェアも全ルートに適用済み。
+- ログインユーザーとパスの`/:user`が一致しない場合は403 Forbidden。
+- `/login`, `/signup`, `/admin/...` は `ReservedPathGuard` により認可対象外。
