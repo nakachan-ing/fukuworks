@@ -12,6 +12,7 @@ import (
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -157,6 +158,10 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 	updatedUser, err := h.userRepo.Update(userName, &targetUser)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
@@ -175,6 +180,10 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 	userName := c.Param("user")
 	if err := h.userRepo.SoftDelete(userName); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}

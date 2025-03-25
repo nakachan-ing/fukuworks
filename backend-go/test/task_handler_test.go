@@ -301,3 +301,135 @@ func newAuthedJSONReq(method, path string, body []byte) *httpstd.Request {
 	req.Header.Set("Content-Type", "application/json")
 	return req
 }
+
+func TestPostTask_ValidationError(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+
+	_ = performSignup(r, "kyota")
+	_ = performCreateProject(r, "kyota", "Bearer mock-token-for-kyota")
+
+	payload := `{"title":""}`
+	req, _ := httpstd.NewRequest("POST", "/kyota/projects/1/tasks", bytes.NewBufferString(payload))
+	req.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Title")
+}
+
+func TestGetTask_NotFound(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	_ = performSignup(r, "kyota")
+	_ = performCreateProject(r, "kyota", "Bearer mock-token-for-kyota")
+
+	req, _ := httpstd.NewRequest("GET", "/kyota/projects/1/tasks/999", nil)
+	req.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "Task not found")
+}
+
+func TestGetTask_Forbidden(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	_ = performSignup(r, "kyota")
+	_ = performSignup(r, "hacker")
+	_ = performCreateProject(r, "kyota", "Bearer mock-token-for-kyota")
+	_ = performCreateTask(r, "kyota", 1, "Bearer mock-token-for-kyota")
+
+	req, _ := httpstd.NewRequest("GET", "/kyota/projects/1/tasks/1", nil)
+	req.Header.Set("Authorization", "Bearer mock-token-for-hacker")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusForbidden, w.Code)
+	assert.Contains(t, w.Body.String(), "not authorized")
+}
+
+func TestUpdateTask_NotFound(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	_ = performSignup(r, "kyota")
+	_ = performCreateProject(r, "kyota", "Bearer mock-token-for-kyota")
+
+	payload := map[string]string{
+		"title":       "Updated Task",
+		"description": "New Desc",
+		"priority":    "Medium",
+		"status":      "Todo",
+		"due_date":    "2025-12-31",
+	}
+	data, _ := json.Marshal(payload)
+	req, _ := httpstd.NewRequest("PATCH", "/kyota/projects/1/tasks/999", bytes.NewBuffer(data))
+	req.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "Task not found")
+}
+
+func TestSoftDeleteTask_NotFound(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	_ = performSignup(r, "kyota")
+	_ = performCreateProject(r, "kyota", "Bearer mock-token-for-kyota")
+
+	req, _ := httpstd.NewRequest("DELETE", "/kyota/projects/1/tasks/999", nil)
+	req.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, httpstd.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "Task not found")
+}
+
+// --- ヘルパー関数 ---
+
+func performSignup(r *gin.Engine, username string) *httptest.ResponseRecorder {
+	payload := map[string]string{
+		"name":     username,
+		"email":    username + "@example.com",
+		"password": "password",
+	}
+	jsonData, _ := json.Marshal(payload)
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
+func performCreateProject(r *gin.Engine, username, token string) *httptest.ResponseRecorder {
+	payload := map[string]string{
+		"title":    "TestProject",
+		"platform": "Web",
+		"client":   "TestClient",
+		"status":   "In progress",
+		"deadline": "2025-12-31",
+	}
+	jsonData, _ := json.Marshal(payload)
+	req, _ := httpstd.NewRequest("POST", "/"+username+"/projects", bytes.NewBuffer(jsonData))
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
+func performCreateTask(r *gin.Engine, username string, pid int, token string) *httptest.ResponseRecorder {
+	payload := map[string]interface{}{
+		"title":       "Test Task",
+		"description": "Test Description",
+		"priority":    "high",
+	}
+	jsonData, _ := json.Marshal(payload)
+	req, _ := httpstd.NewRequest("POST", "/"+username+"/projects/1/tasks", bytes.NewBuffer(jsonData))
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}

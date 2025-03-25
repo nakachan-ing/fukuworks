@@ -11,6 +11,7 @@ import (
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
+	"gorm.io/gorm"
 )
 
 type TaskHandler struct {
@@ -143,7 +144,7 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 
 	task, err := h.taskRepo.Find(userName, uint(pid), uint(tid))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
 		return
 	}
 
@@ -195,6 +196,10 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 
 	updatedTask, err := h.taskRepo.Update(userName, uint(pid), uint(tid), &targetTask)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
 		return
 	}
@@ -227,6 +232,11 @@ func (h *TaskHandler) SoftDeleteTask(c *gin.Context) {
 	}
 
 	if err := h.taskRepo.SoftDelete(userName, uint(pid), uint(tid)); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete task"})
 		return
 	}
 

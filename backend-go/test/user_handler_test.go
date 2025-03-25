@@ -2,6 +2,8 @@ package test
 
 import (
 	"bytes"
+	"encoding/json"
+	"net/http"
 	httpstd "net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	userhttp "github.com/nakachan-ing/fukuworks/backend-go/internal/interfaces/http"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/interfaces/http/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +24,14 @@ func setupRouterForTest() *gin.Engine {
 
 	r.POST("/", userHandler.PostUser)
 	r.POST("/login", userHandler.Login)
+
+	authorized := r.Group("/:user")
+	authorized.Use(userhttp.ReservedPathGuard()) // 必要ならこれも入れる
+	authorized.Use(middleware.AuthMiddleware())  // 認可ミドルウェア
+	{
+		authorized.PATCH("", userHandler.UpdateUser)
+		authorized.DELETE("", userHandler.SoftDeleteUser)
+	}
 
 	return r
 }
@@ -136,4 +147,35 @@ func TestPostUser_Duplicate(t *testing.T) {
 
 	assert.Equal(t, httpstd.StatusConflict, w2.Code)
 	assert.Contains(t, w2.Body.String(), "already exists")
+}
+
+func TestUpdateUser_NotFound(t *testing.T) {
+	r := setupRouterForTest()
+
+	update := map[string]string{
+		"name":  "hoge",
+		"email": "hoge@example.com",
+	}
+	data, _ := json.Marshal(update)
+	req, _ := http.NewRequest("PATCH", "/ghostuser", bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer mock-token-for-ghostuser")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "User not found")
+}
+
+func TestSoftDeleteUser_NotFound(t *testing.T) {
+	r := setupRouterForTest()
+
+	req, _ := http.NewRequest("DELETE", "/ghostuser", nil)
+	req.Header.Set("Authorization", "Bearer mock-token-for-ghostuser")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Contains(t, w.Body.String(), "User not found")
 }

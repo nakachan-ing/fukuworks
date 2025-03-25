@@ -1,11 +1,11 @@
 package test
 
 import (
-	"errors"
 	"sync"
 	"time"
 
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
+	"gorm.io/gorm"
 )
 
 type MockTaskRepo struct {
@@ -39,16 +39,28 @@ func (m *MockTaskRepo) Create(userName string, projectID uint, task *models.Task
 func (m *MockTaskRepo) Find(userName string, projectID uint, taskID uint) (*models.Task, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	tasks, ok := m.tasks[userName][projectID]
+
+	// ユーザーとプロジェクトに紐づいたタスク一覧を取得
+	userProjects, ok := m.tasks[userName]
 	if !ok {
-		return nil, errors.New("not authorized or project not found")
+		// ユーザーがそもそも存在しない、またはプロジェクトが紐づいてない場合
+		return nil, gorm.ErrRecordNotFound
 	}
+
+	tasks, ok := userProjects[projectID]
+	if !ok {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	// 対象タスクを検索
 	for _, t := range tasks {
 		if t.ID == taskID {
 			return t, nil
 		}
 	}
-	return nil, errors.New("task not found")
+
+	// タスクが見つからない場合は GORM 標準の RecordNotFound を返す
+	return nil, gorm.ErrRecordNotFound
 }
 
 func (m *MockTaskRepo) FindAll(userName string, projectID uint) ([]models.Task, error) {
@@ -57,7 +69,7 @@ func (m *MockTaskRepo) FindAll(userName string, projectID uint) ([]models.Task, 
 
 	taskPtrs, ok := m.tasks[userName][projectID]
 	if !ok {
-		return nil, errors.New("no tasks found")
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	tasks := make([]models.Task, len(taskPtrs))
@@ -117,5 +129,5 @@ func (m *MockTaskRepo) HardDelete(id uint) error {
 			}
 		}
 	}
-	return errors.New("task not found")
+	return gorm.ErrRecordNotFound
 }

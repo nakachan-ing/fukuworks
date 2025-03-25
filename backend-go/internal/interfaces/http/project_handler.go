@@ -158,7 +158,7 @@ func (h *ProjectHandler) UpdateProject(c *gin.Context) {
 	userName := c.Param("user")
 	id, err := strconv.ParseUint(c.Param("pid"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "project ID is invalid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project ID is invalid"})
 		return
 	}
 

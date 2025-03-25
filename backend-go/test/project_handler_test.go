@@ -225,3 +225,124 @@ func TestSoftDeleteProject_Success(t *testing.T) {
 
 	assert.Equal(t, httpstd.StatusNoContent, w.Code)
 }
+
+func TestPostProject_ValidationError(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+
+	// ユーザー作成
+	signupPayload := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	// 必須フィールドが欠けたプロジェクト作成
+	payload := `{"title":""}`
+	req2, _ := httpstd.NewRequest("POST", "/kyota/projects", bytes.NewBufferString(payload))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	assert.Equal(t, httpstd.StatusBadRequest, w2.Code)
+	assert.Contains(t, w2.Body.String(), "Title")
+}
+
+func TestPostProject_InvalidDeadline(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+
+	signupPayload := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	payload := `{"title":"test","platform":"web","client":"client","status":"draft","deadline":"31-12-2025"}`
+	req2, _ := httpstd.NewRequest("POST", "/kyota/projects", bytes.NewBufferString(payload))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	assert.Equal(t, httpstd.StatusBadRequest, w2.Code)
+	assert.Contains(t, w2.Body.String(), "Date format is invalid")
+}
+
+func TestGetProject_NotFound(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+
+	signupPayload := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	req2, _ := httpstd.NewRequest("GET", "/kyota/projects/999", nil)
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	assert.Equal(t, httpstd.StatusNotFound, w2.Code)
+	assert.Contains(t, w2.Body.String(), "Project not found")
+}
+
+func TestGetProject_Forbidden(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+
+	// 正規ユーザーで作成
+	signupPayload1 := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload1))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	projectPayload := `{"title":"project1","platform":"web","client":"client","status":"draft","deadline":"2025-12-31"}`
+	req2, _ := httpstd.NewRequest("POST", "/kyota/projects", bytes.NewBufferString(projectPayload))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	// 他人がアクセス
+	signupPayload2 := `{"name":"hacker","email":"hacker@example.com","password":"hack1234"}`
+	req3, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload2))
+	req3.Header.Set("Content-Type", "application/json")
+	w3 := httptest.NewRecorder()
+	r.ServeHTTP(w3, req3)
+
+	req4, _ := httpstd.NewRequest("GET", "/kyota/projects/1", nil)
+	req4.Header.Set("Authorization", "Bearer mock-token-for-hacker")
+	w4 := httptest.NewRecorder()
+	r.ServeHTTP(w4, req4)
+
+	assert.Equal(t, httpstd.StatusForbidden, w4.Code)
+	assert.Contains(t, w4.Body.String(), "not authorized")
+}
+
+func TestUpdateProject_InvalidID(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+
+	signupPayload := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signupPayload))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	r.ServeHTTP(w1, req1)
+
+	payload := map[string]string{
+		"title":    "修正タイトル",
+		"platform": "Web",
+		"client":   "Test",
+		"status":   "Open",
+		"deadline": "2025-12-31",
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	req2, _ := httpstd.NewRequest("PATCH", "/kyota/projects/abc", bytes.NewBuffer(jsonData))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	r.ServeHTTP(w2, req2)
+
+	assert.Equal(t, httpstd.StatusBadRequest, w2.Code)
+	assert.Contains(t, w2.Body.String(), "Project ID is invalid")
+}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
+	"gorm.io/gorm"
 )
 
 type MockUserRepo struct {
@@ -41,9 +42,15 @@ func (m *MockUserRepo) Find(name string) (*models.User, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	if name == "ghostuser" {
+		err := gorm.ErrRecordNotFound
+		println("🔥 returning gorm.ErrRecordNotFound:", err.Error()) // ログも残す
+		return nil, err
+	}
+
 	user, ok := m.users[name]
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, gorm.ErrRecordNotFound // 👈 ここも重要！
 	}
 	return user, nil
 }
@@ -54,7 +61,7 @@ func (m *MockUserRepo) Update(name string, updated *models.User) (*models.User, 
 
 	existing, ok := m.users[name]
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, gorm.ErrRecordNotFound
 	}
 	existing.Name = updated.Name
 	existing.Email = updated.Email
@@ -69,7 +76,7 @@ func (m *MockUserRepo) SoftDelete(name string) error {
 
 	user, ok := m.users[name]
 	if !ok {
-		return errors.New("user not found")
+		return gorm.ErrRecordNotFound
 	}
 	user.DeletedAt.Valid = true
 	user.DeletedAt.Time = time.Now()
