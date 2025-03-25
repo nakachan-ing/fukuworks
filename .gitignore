@@ -1,0 +1,7 @@
+# Ignore SQLite database
+*.db
+*.db-wal
+*.db-shm
+
+# Ignore .env files
+.env*

@@ -1,0 +1,54 @@
+name: Go CI for backend-go
+
+on:
+  push:
+    branches: [main, dev, dev-go]
+    paths:
+      - "backend-go/**"
+  pull_request:
+    branches: [main, dev, dev-go]
+    paths:
+      - "backend-go/**"
+
+jobs:
+  test:
+    name: 🧪 Go Test (backend-go)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend-go
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      - name: 📦 Install dependencies
+        run: go mod tidy
+
+      - name: ✅ Run go fmt check
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "❌ Code is not formatted:"
+            gofmt -l .
+            exit 1
+          fi
+
+      - name: 🔍 Run go vet
+        run: go vet ./...
+
+      - name: 🧪 Run tests
+        run: go test -v -cover ./...
+
+      # Optional: Upload coverage report
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     files: coverage.out
+      #     flags: backend-go
