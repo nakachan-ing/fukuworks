@@ -215,7 +215,6 @@ func (h *ProjectHandler) SoftDeleteProject(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project"})
 		return
 	}
-
 	c.Status(http.StatusNoContent)
 
 }
