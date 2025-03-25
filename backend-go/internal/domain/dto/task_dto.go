@@ -1,11 +1,11 @@
 package dto
 
 type TaskCreateRequest struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Status      string `json:"status" binding:"required"`
-	Priority    string `json:"priority" binding:"required"`
-	DueDate     string `json:"due_date" binding:"required"`
+	Title       string `json:"title" binding:"required,min=1,max=100"`
+	Description string `json:"description" binding:"required,max=1000"`
+	Status      string `json:"status" binding:"required,oneof=Todo Doing Done"`
+	Priority    string `json:"priority" binding:"required,oneof=Low Medium High"`
+	DueDate     string `json:"due_date"`
 }
 
 type TaskUpdateRequest struct {
@@ -13,7 +13,7 @@ type TaskUpdateRequest struct {
 	Description string `json:"description" binding:"required,max=1000"`
 	Status      string `json:"status" binding:"required,oneof=Todo Doing Done"`
 	Priority    string `json:"priority" binding:"required,oneof=Low Medium High"`
-	DueDate     string `json:"due_date" binding:"required"`
+	DueDate     string `json:"due_date"`
 }
 
 type TaskResponse struct {

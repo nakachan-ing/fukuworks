@@ -22,10 +22,10 @@ type Project struct {
 }
 
 var allowedStatuses = map[string]bool{
-	"Open":        true,
-	"In progress": true,
-	"Completed":   true,
-	"Canceled":    true,
+	"NotStarted": true,
+	"InProgress": true,
+	"Completed":  true,
+	"Canceled":   true,
 }
 
 func (p *Project) SetStatus(status string) error {

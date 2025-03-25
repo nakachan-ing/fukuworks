@@ -3,8 +3,10 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	httpstd "net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +42,7 @@ func setupProjectRouterWithAuth() *gin.Engine {
 func TestGetProject_ForbiddenForOtherUser(t *testing.T) {
 	r := setupProjectRouterWithAuth()
 
-	signup := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	signupReq, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
 	signupReq.Header.Set("Content-Type", "application/json")
 	signupRes := httptest.NewRecorder()
@@ -51,7 +53,7 @@ func TestGetProject_ForbiddenForOtherUser(t *testing.T) {
 		"platform":      "個人",
 		"client":        "テストクライアント",
 		"estimated_fee": 10000,
-		"status":        "In progress",
+		"status":        "InProgress",
 		"deadline":      "2025-04-01",
 	}
 	projectJson, _ := json.Marshal(project)
@@ -78,7 +80,7 @@ func TestUpdateProject_ForbiddenForOtherUser(t *testing.T) {
 	r := setupProjectRouterWithAuth()
 
 	// ユーザー作成とプロジェクト登録
-	signup := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	signupReq, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
 	signupReq.Header.Set("Content-Type", "application/json")
 	_ = httptest.NewRecorder()
@@ -124,7 +126,7 @@ func TestUpdateProject_ForbiddenForOtherUser(t *testing.T) {
 func TestSoftDeleteProject_ForbiddenForOtherUser(t *testing.T) {
 	r := setupProjectRouterWithAuth()
 
-	signup := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	signupReq, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
 	signupReq.Header.Set("Content-Type", "application/json")
 	_ = httptest.NewRecorder()
@@ -158,7 +160,7 @@ func TestSoftDeleteProject_ForbiddenForOtherUser(t *testing.T) {
 func TestUpdateProject_Success(t *testing.T) {
 	r := setupProjectRouterWithAuth()
 
-	signup := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	signupReq, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
 	signupReq.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(httptest.NewRecorder(), signupReq)
@@ -168,7 +170,7 @@ func TestUpdateProject_Success(t *testing.T) {
 		"platform":      "個人",
 		"client":        "テスト",
 		"estimated_fee": 3000,
-		"status":        "Planning",
+		"status":        "InProgress",
 		"deadline":      "2025-05-01",
 	}
 	projectJson, _ := json.Marshal(project)
@@ -182,7 +184,7 @@ func TestUpdateProject_Success(t *testing.T) {
 		"platform":      "チーム",
 		"client":        "更新クライアント",
 		"estimated_fee": 3500,
-		"status":        "In progress",
+		"status":        "InProgress",
 		"deadline":      "2025-06-01",
 	}
 	updatedJson, _ := json.Marshal(updated)
@@ -199,7 +201,7 @@ func TestUpdateProject_Success(t *testing.T) {
 func TestSoftDeleteProject_Success(t *testing.T) {
 	r := setupProjectRouterWithAuth()
 
-	signup := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	signupReq, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
 	signupReq.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(httptest.NewRecorder(), signupReq)
@@ -209,7 +211,7 @@ func TestSoftDeleteProject_Success(t *testing.T) {
 		"platform":      "個人",
 		"client":        "削除クライアント",
 		"estimated_fee": 7000,
-		"status":        "Done",
+		"status":        "Completed",
 		"deadline":      "2025-07-01",
 	}
 	projectJson, _ := json.Marshal(project)
@@ -257,7 +259,7 @@ func TestPostProject_InvalidDeadline(t *testing.T) {
 	w1 := httptest.NewRecorder()
 	r.ServeHTTP(w1, req1)
 
-	payload := `{"title":"test","platform":"web","client":"client","status":"draft","deadline":"31-12-2025"}`
+	payload := `{"title":"test","platform":"web","client":"client","status":"InProgress","deadline":"31-12-2025"}`
 	req2, _ := httpstd.NewRequest("POST", "/kyota/projects", bytes.NewBufferString(payload))
 	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
 	req2.Header.Set("Content-Type", "application/json")
@@ -296,7 +298,7 @@ func TestGetProject_Forbidden(t *testing.T) {
 	w1 := httptest.NewRecorder()
 	r.ServeHTTP(w1, req1)
 
-	projectPayload := `{"title":"project1","platform":"web","client":"client","status":"draft","deadline":"2025-12-31"}`
+	projectPayload := `{"title":"project1","platform":"web","client":"client","status":"Open","deadline":"2025-12-31"}`
 	req2, _ := httpstd.NewRequest("POST", "/kyota/projects", bytes.NewBufferString(projectPayload))
 	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
 	req2.Header.Set("Content-Type", "application/json")
@@ -345,4 +347,56 @@ func TestUpdateProject_InvalidID(t *testing.T) {
 
 	assert.Equal(t, httpstd.StatusBadRequest, w2.Code)
 	assert.Contains(t, w2.Body.String(), "Project ID is invalid")
+}
+
+func TestProjectValidation_TitleTooLong(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := http.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req1)
+
+	project := map[string]interface{}{
+		"title":         strings.Repeat("あ", 101),
+		"platform":      "web",
+		"client":        "client",
+		"estimated_fee": 1000,
+		"status":        "Open",
+		"deadline":      "2025-12-31",
+	}
+	body, _ := json.Marshal(project)
+	req2, _ := http.NewRequest("POST", "/kyota/projects", bytes.NewBuffer(body))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req2)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Title")
+}
+
+func TestProjectValidation_InvalidStatus(t *testing.T) {
+	r := setupProjectRouterWithAuth()
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := http.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req1)
+
+	project := map[string]interface{}{
+		"title":         "プロジェクト",
+		"platform":      "web",
+		"client":        "client",
+		"estimated_fee": 1000,
+		"status":        "Planning",
+		"deadline":      "2025-12-31",
+	}
+	body, _ := json.Marshal(project)
+	req2, _ := http.NewRequest("POST", "/kyota/projects", bytes.NewBuffer(body))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req2)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Status")
 }

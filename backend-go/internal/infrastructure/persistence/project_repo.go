@@ -56,6 +56,10 @@ func (r *ProjectRepositoryImpl) Update(userName string, id uint, project *models
 		return nil, err
 	}
 
+	if err := project.SetStatus(project.Status); err != nil {
+		return nil, err
+	}
+
 	updateData := map[string]interface{}{
 		"title":         project.Title,
 		"description":   project.Description,

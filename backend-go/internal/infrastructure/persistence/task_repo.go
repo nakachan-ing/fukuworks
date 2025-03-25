@@ -74,6 +74,14 @@ func (r *TaskRepositoryImpl) Update(userName string, pid, tid uint, task *models
 		return nil, err
 	}
 
+	if err := task.SetStatus(task.Status); err != nil {
+		return nil, err
+	}
+
+	if err := task.SetPriority(task.Priority); err != nil {
+		return nil, err
+	}
+
 	updateData := map[string]interface{}{
 		"title":       task.Title,
 		"description": task.Description,

@@ -3,8 +3,11 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	httpstd "net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -386,13 +389,91 @@ func TestSoftDeleteTask_NotFound(t *testing.T) {
 	assert.Contains(t, w.Body.String(), "Task not found")
 }
 
+func TestTaskValidation_InvalidPriority(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := http.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req1)
+
+	project := map[string]interface{}{
+		"title":         "プロジェクト",
+		"platform":      "web",
+		"client":        "client",
+		"estimated_fee": 1000,
+		"status":        "Open",
+		"deadline":      "2025-12-31",
+	}
+	body, _ := json.Marshal(project)
+	req2, _ := http.NewRequest("POST", "/kyota/projects", bytes.NewBuffer(body))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req2)
+
+	task := map[string]interface{}{
+		"title":       "タスク",
+		"description": "説明",
+		"status":      "Open",
+		"priority":    "Extreme",
+		"due_date":    "2025-10-01",
+	}
+	taskBody, _ := json.Marshal(task)
+	req3, _ := http.NewRequest("POST", "/kyota/projects/1/tasks", bytes.NewBuffer(taskBody))
+	req3.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req3.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req3)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Priority")
+}
+
+func TestTaskValidation_TitleTooLong(t *testing.T) {
+	r := setupTaskRouterWithAuth()
+	signup := `{"name":"kyota","email":"kyota@example.com","password":"pass1234"}`
+	req1, _ := http.NewRequest("POST", "/signup", bytes.NewBufferString(signup))
+	req1.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req1)
+
+	project := map[string]interface{}{
+		"title":         "プロジェクト",
+		"platform":      "web",
+		"client":        "client",
+		"estimated_fee": 1000,
+		"status":        "Open",
+		"deadline":      "2025-12-31",
+	}
+	body, _ := json.Marshal(project)
+	req2, _ := http.NewRequest("POST", "/kyota/projects", bytes.NewBuffer(body))
+	req2.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req2.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(httptest.NewRecorder(), req2)
+
+	task := map[string]interface{}{
+		"title":       strings.Repeat("あ", 101),
+		"description": "説明",
+		"status":      "Open",
+		"priority":    "Low",
+		"due_date":    "2025-10-01",
+	}
+	taskBody, _ := json.Marshal(task)
+	req3, _ := http.NewRequest("POST", "/kyota/projects/1/tasks", bytes.NewBuffer(taskBody))
+	req3.Header.Set("Authorization", "Bearer mock-token-for-kyota")
+	req3.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req3)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "Title")
+}
+
 // --- ヘルパー関数 ---
 
 func performSignup(r *gin.Engine, username string) *httptest.ResponseRecorder {
 	payload := map[string]string{
 		"name":     username,
 		"email":    username + "@example.com",
-		"password": "password",
+		"password": "password123",
 	}
 	jsonData, _ := json.Marshal(payload)
 	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBuffer(jsonData))
@@ -407,7 +488,7 @@ func performCreateProject(r *gin.Engine, username, token string) *httptest.Respo
 		"title":    "TestProject",
 		"platform": "Web",
 		"client":   "TestClient",
-		"status":   "In progress",
+		"status":   "InProgress",
 		"deadline": "2025-12-31",
 	}
 	jsonData, _ := json.Marshal(payload)
@@ -420,13 +501,16 @@ func performCreateProject(r *gin.Engine, username, token string) *httptest.Respo
 }
 
 func performCreateTask(r *gin.Engine, username string, pid int, token string) *httptest.ResponseRecorder {
+	strPid := strconv.Itoa(pid)
 	payload := map[string]interface{}{
 		"title":       "Test Task",
 		"description": "Test Description",
-		"priority":    "high",
+		"priority":    "High",
+		"status":      "Todo",
+		"due_date":    "2025-12-31",
 	}
 	jsonData, _ := json.Marshal(payload)
-	req, _ := httpstd.NewRequest("POST", "/"+username+"/projects/1/tasks", bytes.NewBuffer(jsonData))
+	req, _ := httpstd.NewRequest("POST", "/"+username+"/projects/"+strPid+"/tasks", bytes.NewBuffer(jsonData))
 	req.Header.Set("Authorization", token)
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

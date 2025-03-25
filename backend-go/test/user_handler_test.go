@@ -133,7 +133,7 @@ func TestPostUser_Duplicate(t *testing.T) {
 	r := setupRouterForTest()
 
 	// 同じname/emailで2回POSTする
-	payload := `{"name":"kyota","email":"kyota@example.com","password":"secret"}`
+	payload := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
 	req1, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
 	req1.Header.Set("Content-Type", "application/json")
 	w1 := httptest.NewRecorder()
@@ -153,8 +153,9 @@ func TestUpdateUser_NotFound(t *testing.T) {
 	r := setupRouterForTest()
 
 	update := map[string]string{
-		"name":  "hoge",
-		"email": "hoge@example.com",
+		"name":     "hoge",
+		"email":    "hoge@example.com",
+		"password": "secretpassword",
 	}
 	data, _ := json.Marshal(update)
 	req, _ := http.NewRequest("PATCH", "/ghostuser", bytes.NewBuffer(data))
