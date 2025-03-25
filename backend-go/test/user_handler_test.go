@@ -26,8 +26,8 @@ func setupRouterForTest() *gin.Engine {
 	r.POST("/login", userHandler.Login)
 
 	authorized := r.Group("/:user")
-	authorized.Use(userhttp.ReservedPathGuard()) // 必要ならこれも入れる
-	authorized.Use(middleware.AuthMiddleware())  // 認可ミドルウェア
+	authorized.Use(middleware.ReservedPathGuard()) // 必要ならこれも入れる
+	authorized.Use(middleware.AuthMiddleware())    // 認可ミドルウェア
 	{
 		authorized.PATCH("", userHandler.UpdateUser)
 		authorized.DELETE("", userHandler.SoftDeleteUser)

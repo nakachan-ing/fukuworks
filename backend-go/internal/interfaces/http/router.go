@@ -9,7 +9,7 @@ import (
 
 func NewRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
-	router.Use(ReservedPathGuard())
+	router.Use(middleware.ReservedPathGuard())
 
 	userRepo := persistence.NewUserRepository(db)
 	userHandler := NewUserHandler(userRepo)

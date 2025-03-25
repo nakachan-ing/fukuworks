@@ -7,6 +7,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Reserved words (e.g., for static routes like /login, /admin, etc.)
+var reservedPaths = map[string]bool{
+	"login":  true,
+	"admin":  true,
+	"health": true,
+}
+
+// Middleware to skip reserved paths from user route handling
+func ReservedPathGuard() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		first := strings.Split(strings.TrimLeft(c.Request.URL.Path, "/"), "/")[0]
+		if reservedPaths[first] {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Route not found"})
+			return
+		}
+		c.Next()
+	}
+}
+
 // AuthMiddleware は Authorization ヘッダーをチェックし、ユーザー名を Context に格納します
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
