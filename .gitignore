@@ -2,3 +2,8 @@
 *.db
 *.db-wal
 *.db-shm
+
+# Ignore .env files
+.env*
+
+stacks/
