@@ -1,6 +1,3 @@
-# frontend-appsmith/docker-compose.yml
-version: "3.7"
-
 services:
   appsmith:
     image: appsmith/appsmith-ce
