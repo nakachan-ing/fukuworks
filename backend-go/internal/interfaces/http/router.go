@@ -42,7 +42,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	// 認証が必要なパス
 	authorized := router.Group("/:user")
-	authorized.Use(middleware.AuthMiddleware())
+	authorized.Use(middleware.ReservedPathGuard(), middleware.AuthMiddleware())
 	{
 		authorized.GET("", userHandler.GetUser)
 		authorized.PATCH("", userHandler.UpdateUser)
@@ -65,14 +65,17 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	// ==============================================================================
 	// for owner
-	api := router.Group("/admin")
+	admin := router.Group("/admin")
+	admin.Use(middleware.AuthMiddleware())
+	admin.Use(middleware.RequireAdminMiddleware())
 	{
-		api.GET("/users", userHandler.GetAllUsers)
-		api.DELETE("/users/:id", userHandler.HardDeleteUser)
-		api.GET("/projects", projectHandler.GetAllProjectsForOwner)
-		api.DELETE("/projects/:id", projectHandler.HardDeleteProject)
-		api.GET("/tasks", taskHandler.GetAllTasksForOwner)
-		api.DELETE("/tasks/:id", taskHandler.HardDeleteTask)
+		admin.GET("/me", userHandler.GetAdminMe)
+		admin.GET("/users", userHandler.GetAllUsers)
+		admin.DELETE("/users/:id", userHandler.HardDeleteUser)
+		admin.GET("/projects", projectHandler.GetAllProjectsForOwner)
+		admin.DELETE("/projects/:id", projectHandler.HardDeleteProject)
+		admin.GET("/tasks", taskHandler.GetAllTasksForOwner)
+		admin.DELETE("/tasks/:id", taskHandler.HardDeleteTask)
 	}
 	// ==============================================================================
 

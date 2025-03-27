@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/utils"
 )
 
 // Reserved words (e.g., for static routes like /login, /admin, etc.)
@@ -29,30 +31,38 @@ func ReservedPathGuard() gin.HandlerFunc {
 // AuthMiddleware は Authorization ヘッダーをチェックし、ユーザー名を Context に格納します
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
-		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization required"})
 			return
 		}
 
-		// トークンは "Bearer mock-token-for-<username>" の形式と仮定
-		if !strings.HasPrefix(token, "Bearer mock-token-for-") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			return utils.JwtSecret, nil
+		})
+		if err != nil || !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
 
-		// ユーザー名を抽出
-		username := strings.TrimPrefix(token, "Bearer mock-token-for-")
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			return
+		}
+
+		username, _ := claims["username"].(string)
+		role, _ := claims["role"].(string)
+
 		pathUser := c.Param("user")
-
-		// 認可: パスの :user と一致していなければ拒否
-		if username != pathUser {
+		if pathUser != "" && username != pathUser {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "You are not authorized to access this resource"})
 			return
 		}
 
-		// コンテキストにユーザー名を保存（必要に応じて）
 		c.Set("username", username)
+		c.Set("role", role) // 💡ここでコンテキストにroleを渡す
 		c.Next()
 	}
 }

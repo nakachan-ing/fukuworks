@@ -12,6 +12,7 @@ import (
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/dto"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/models"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/domain/repositories"
+	"github.com/nakachan-ing/fukuworks/backend-go/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -100,8 +101,12 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// 仮のトークンを返す（JWT対応は今後）
-	token := "mock-token-for-" + user.Name
+	token, err := utils.GenerateJWT(user.Name, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
@@ -173,6 +178,18 @@ func (h *UserHandler) SoftDeleteUser(c *gin.Context) {
 
 // ==================================================================================================================
 // for owner
+func (h *UserHandler) GetAdminMe(c *gin.Context) {
+	username, _ := c.Get("username")
+
+	user, err := h.userRepo.Find(username.(string))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Admin user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userRepo.FindAll()
 	if err != nil {

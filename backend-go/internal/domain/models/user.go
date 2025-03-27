@@ -7,6 +7,8 @@ type User struct {
 	Name     string
 	Email    string    `gorm:"unique"`
 	Projects []Project `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	// for auth test
 	Password string
+	// for role test
+	Role string `gorm:"default:user"` // user or admin
+
 }

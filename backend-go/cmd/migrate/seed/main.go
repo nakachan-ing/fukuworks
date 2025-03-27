@@ -25,6 +25,7 @@ func main() {
 
 	userRepo := persistence.NewUserRepository(db)
 	users := []models.User{
+		{Name: "admin", Email: "fukuworks@example.com", Password: "adminpass", Role: "admin"},
 		{Name: "nakachan-ing", Email: "hogehoge@gmail.com", Password: "secret123"},
 		{Name: "nakachan", Email: "hogehoge.icloud.com", Password: "secret456"},
 	}
@@ -35,7 +36,7 @@ func main() {
 	projectRepo := persistence.NewProjectRepository(db)
 	projects := []models.Project{
 		{
-			UserID:       1,
+			UserID:       2,
 			Title:        "FukuWarksの開発",
 			Description:  "副業案件管理アプリケーションの作成プロジェクト",
 			Platform:     "個人",
@@ -45,7 +46,7 @@ func main() {
 			Deadline:     time.Date(2025, 5, 31, 0, 0, 0, 0, time.Local),
 		},
 		{
-			UserID:       2,
+			UserID:       3,
 			Title:        "ztl-cliの改修",
 			Description:  "zettelkasten-cliのプロジェクト",
 			Platform:     "個人",
