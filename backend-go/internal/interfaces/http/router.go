@@ -1,6 +1,9 @@
 package http
 
 import (
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/infrastructure/persistence"
 	"github.com/nakachan-ing/fukuworks/backend-go/internal/interfaces/http/middleware"
@@ -9,7 +12,17 @@ import (
 
 func NewRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
-	router.Use(middleware.ReservedPathGuard())
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8080", "http://host.docker.internal:8080"}, // Appsmith URL
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	// router.Use(middleware.ReservedPathGuard())
 
 	userRepo := persistence.NewUserRepository(db)
 	userHandler := NewUserHandler(userRepo)

@@ -40,7 +40,7 @@ func TestPostUser_Success(t *testing.T) {
 	r := setupRouterForTest()
 
 	body := `{"name":"kyota","email":"kyota@example.com","password":"secret123"}`
-	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(body))
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -54,7 +54,7 @@ func TestPostUser_ValidationError(t *testing.T) {
 	r := setupRouterForTest()
 
 	body := `{"name":"","email":"invalid@example.com","password":"secret123"}`
-	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(body))
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -69,7 +69,7 @@ func TestLogin_Success(t *testing.T) {
 	r := setupRouterForTest()
 
 	body := `{"name":"kyota","email":"kyota@example.com","password":"secret123"}`
-	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(body))
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -88,7 +88,7 @@ func TestLogin_Failure(t *testing.T) {
 	r := setupRouterForTest()
 
 	body := `{"name":"kyota","email":"kyota@example.com","password":"secret123"}`
-	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(body))
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -108,7 +108,7 @@ func TestPostUser_InvalidEmailFormat(t *testing.T) {
 
 	// email形式が不正
 	payload := `{"name":"kyota","email":"invalid-email","password":"pass1234"}`
-	req, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(payload))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -134,13 +134,13 @@ func TestPostUser_Duplicate(t *testing.T) {
 
 	// 同じname/emailで2回POSTする
 	payload := `{"name":"kyota","email":"kyota@example.com","password":"secretpassword"}`
-	req1, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req1, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(payload))
 	req1.Header.Set("Content-Type", "application/json")
 	w1 := httptest.NewRecorder()
 	r.ServeHTTP(w1, req1)
 	assert.Equal(t, httpstd.StatusCreated, w1.Code)
 
-	req2, _ := httpstd.NewRequest("POST", "/", bytes.NewBufferString(payload))
+	req2, _ := httpstd.NewRequest("POST", "/signup", bytes.NewBufferString(payload))
 	req2.Header.Set("Content-Type", "application/json")
 	w2 := httptest.NewRecorder()
 	r.ServeHTTP(w2, req2)
