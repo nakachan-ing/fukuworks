@@ -6,4 +6,4 @@
 # Ignore .env files
 .env*
 
-stacks/
+frontend-appsmith/stacks/
